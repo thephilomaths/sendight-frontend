@@ -35,6 +35,9 @@ module.exports = {
     ],
     'react/jsx-filename-extension': [1, { 'extensions': ['.tsx', '.ts'] }],
     'quotes': ['error', 'single'],
+    'import/prefer-default-export': 'off',
+    'arrow-parens': ['error', 'always'],
+    'arrow-body-style': ['error', 'always']
   },
   'settings': {
     'import/resolver': {
