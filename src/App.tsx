@@ -1,11 +1,23 @@
 import React from 'react';
+import styled from 'styled-components';
 
-function App() {
+import { Sharing } from './screens/Sharing';
+import { Navbar } from './components/Navbar';
+
+const Wrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  width: 100%;
+`;
+
+const App = () => {
   return (
-    <div>
-      <div>Hello</div>
-    </div>
+    <Wrapper>
+      <Navbar />
+      <Sharing />
+    </Wrapper>
   );
-}
+};
 
 export default App;
