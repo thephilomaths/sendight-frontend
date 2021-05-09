@@ -38,7 +38,7 @@ const FileDropperWrapper = styled.div`
 
   @media screen and (min-width: 960px) {
     margin: 0 48px 0 0;
-    width: 45%;
+    width: 60%;
   }
 `;
 
@@ -61,7 +61,7 @@ const Illustration = styled.img`
   height: 250px;
 `;
 
-const Sharing = () => {
+const Sharing = (): React.ReactElement => {
   return (
     <Wrapper>
       <Container>

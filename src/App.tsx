@@ -8,7 +8,7 @@ const Wrapper = styled.div`
   height: 100%;
 `;
 
-const App = () => {
+const App = (): React.ReactElement => {
   return (
     <Wrapper>
       <Navbar />

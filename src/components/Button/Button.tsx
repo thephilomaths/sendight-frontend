@@ -1,27 +1,47 @@
 import React from 'react';
 import styled from 'styled-components';
 
-const Wrapper = styled.div`
+interface ButtonProps {
+  width?: string;
+  textAlign?: string;
+}
+
+const Wrapper = styled.div<ButtonProps>`
   color: white;
   background-color: #e91e63;
   padding: 16px 24px;
   border-radius: 8px;
   cursor: pointer;
   font-weight: 700;
+  width: ${({ width }) => {
+    return width;
+  }};
+  text-align: ${({ textAlign }) => {
+    return textAlign;
+  }};
 
   &:hover {
     background-color: #ad1457;
   }
 `;
 
-interface IProps {
+interface IProps extends ButtonProps {
   children: string;
 }
 
-const Button = (props: IProps) => {
-  const { children } = props;
+const Button = (props: IProps): React.ReactElement => {
+  const { children, width, textAlign } = props;
 
-  return <Wrapper>{children}</Wrapper>;
+  return (
+    <Wrapper width={width} textAlign={textAlign}>
+      {children}
+    </Wrapper>
+  );
+};
+
+Button.defaultProps = {
+  width: 'unset',
+  textAlign: 'center',
 };
 
 export { Button };

@@ -20,7 +20,7 @@ const Title = styled.span`
   margin-left: 6px;
 `;
 
-const Navbar = () => {
+const Navbar = (): React.ReactElement => {
   return (
     <Wrapper>
       <SendIcon
