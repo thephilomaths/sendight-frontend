@@ -15,12 +15,16 @@ const Wrapper = styled.div`
   align-items: center;
   justify-content: center;
   border-radius: 5px;
-  padding: 0 24px;
+  padding: 24px;
   transition: 0.3s;
 
   &:hover {
     background-color: #111111;
     transition: 0.3s;
+  }
+  
+  @media screen and (min-width: 960px) {
+    padding: 96px 24px;
   }
 `;
 
@@ -44,7 +48,7 @@ const File = styled.input`
 
 const iconStyles = {
   color: '#E91E63',
-  'font-size': '48px',
+  fontSize: '48px',
 };
 
 const FileDropper = () => {
