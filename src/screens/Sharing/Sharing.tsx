@@ -6,17 +6,17 @@ import { Text } from '../../components/Text';
 import SendIllustration from '../../assets/illustrations/send.svg';
 
 const Wrapper = styled.div`
-  background-color: black;
-  height: 100%;
-  width: 100%;
-  flex: 1;
   display: flex;
-  align-items: center;
-  justify-content: center;
+  height: 90%;
+
+  @media screen and (min-width: 960px) {
+    align-items: center;
+    justify-content: center;
+  }
 `;
 
 const Container = styled.div`
-  height: 500px;
+  height: fit-content;
   width: 1024px;
   padding: 32px;
   border: 1px solid rgba(42, 42, 46, 1);
@@ -26,19 +26,30 @@ const Container = styled.div`
 
 const ActionWrapper = styled.div`
   display: flex;
-  height: 100%;
+  flex-direction: column;
+
+  @media screen and (min-width: 960px) {
+    flex-direction: row;
+  }
 `;
 
 const FileDropperWrapper = styled.div`
-  margin-right: 48px;
-  width: 45%;
+  margin: 0 0 48px 0;
+
+  @media screen and (min-width: 960px) {
+    margin: 0 48px 0 0;
+    width: 45%;
+  }
 `;
 
 const Content = styled.div`
-  width: 50%;
   display: flex;
   flex-direction: column;
   justify-content: center;
+
+  @media screen and (min-width: 960px) {
+    width: 50%;
+  }
 `;
 
 const Heading = styled.div`
