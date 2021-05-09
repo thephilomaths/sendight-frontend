@@ -6,11 +6,21 @@ interface TextProps {
   fontWeight?: string;
   lineHeight?: string;
   letterSpacing?: string;
+  maxWidth?: string;
   color?: string;
+  truncate?: boolean;
 }
 
 const getTextStyles = (styles: TextProps) => {
-  const { fontSize, fontWeight, lineHeight, letterSpacing, color } = styles;
+  const {
+    fontSize,
+    fontWeight,
+    lineHeight,
+    letterSpacing,
+    color,
+    truncate,
+    maxWidth,
+  } = styles;
 
   return `
     font-size: ${fontSize};
@@ -18,6 +28,16 @@ const getTextStyles = (styles: TextProps) => {
     line-height: ${lineHeight};
     color: ${color};
     letter-spacing: ${letterSpacing};
+    max-width: ${maxWidth};
+
+    ${
+      truncate &&
+      `
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        overflow: hidden;
+      `
+    }
   `;
 };
 
@@ -29,9 +49,10 @@ const Wrapper = styled.span<TextProps>`
 
 interface IProps extends TextProps {
   content: string;
+  title?: string;
 }
 
-const Text = (props: IProps) => {
+const Text = (props: IProps): React.ReactElement => {
   const {
     content,
     fontSize,
@@ -39,6 +60,9 @@ const Text = (props: IProps) => {
     lineHeight,
     letterSpacing,
     color,
+    truncate,
+    title,
+    maxWidth,
   } = props;
 
   return (
@@ -48,6 +72,9 @@ const Text = (props: IProps) => {
       lineHeight={lineHeight}
       letterSpacing={letterSpacing}
       color={color}
+      truncate={truncate}
+      title={title}
+      maxWidth={maxWidth}
     >
       {content}
     </Wrapper>
@@ -60,6 +87,9 @@ Text.defaultProps = {
   lineHeight: '1.5',
   letterSpacing: 'initial',
   color: 'white',
+  truncate: false,
+  title: '',
+  maxWidth: 'unset',
 };
 
 export { Text };
