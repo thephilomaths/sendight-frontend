@@ -3,8 +3,8 @@ import styled from 'styled-components';
 import FileIcon from '@material-ui/icons/Description';
 import RemoveIcon from '@material-ui/icons/HighlightOff';
 
-import { Text } from '../Text';
-import { FileDropperUtil } from '../../utils/FileDropper';
+import { Text } from '../../Text';
+import { FileDropperUtil } from '../../../utils/FileDropper';
 
 const Wrapper = styled.div`
   display: flex;

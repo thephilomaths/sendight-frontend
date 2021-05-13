@@ -27,13 +27,14 @@ const Wrapper = styled.div<ButtonProps>`
 
 interface IProps extends ButtonProps {
   children: string;
+  onClick?: (e: React.MouseEvent<HTMLDivElement>) => void;
 }
 
 const Button = (props: IProps): React.ReactElement => {
-  const { children, width, textAlign } = props;
+  const { children, width, textAlign, onClick } = props;
 
   return (
-    <Wrapper width={width} textAlign={textAlign}>
+    <Wrapper width={width} textAlign={textAlign} onClick={onClick}>
       {children}
     </Wrapper>
   );
@@ -42,6 +43,7 @@ const Button = (props: IProps): React.ReactElement => {
 Button.defaultProps = {
   width: 'unset',
   textAlign: 'center',
+  onClick: null,
 };
 
 export { Button };

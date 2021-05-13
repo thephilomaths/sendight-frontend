@@ -2,9 +2,9 @@ import React, { useRef, useState } from 'react';
 import styled from 'styled-components';
 import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
 
-import { Button } from '../Button';
-import { Text } from '../Text';
-import { FileDropperUtil } from '../../utils/FileDropper';
+import { Button } from '../../Button';
+import { Text } from '../../Text';
+import { FileDropperUtil } from '../../../utils/FileDropper';
 import { FileItem } from './FileItem';
 
 const Wrapper = styled.div<{ isDragging: boolean; containItems: boolean }>`
@@ -129,12 +129,21 @@ const FileDropper = (): React.ReactElement => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const dragCounter = useRef(0);
 
+  /**
+   * Function to handle the file input selection
+   */
   const onAddClickHandler = () => {
     if (fileInputRef.current) {
       fileInputRef.current.click();
     }
   };
 
+  /**
+   * Function to handle file input when user tries to select files
+   * from native file select dialog box
+   *
+   * @param e - React change event
+   */
   const onFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     e.preventDefault();
     const { files } = e.target;
@@ -146,11 +155,21 @@ const FileDropper = (): React.ReactElement => {
     }
   };
 
+  /**
+   * Function to handle drag
+   *
+   * @param e - React drag event
+   */
   const handleDrag = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     e.stopPropagation();
   };
 
+  /**
+   * Function to handle when drag mouse enters the file dropper area
+   *
+   * @param e - React drag event
+   */
   const handleDragEnter = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     e.stopPropagation();
@@ -164,6 +183,11 @@ const FileDropper = (): React.ReactElement => {
     }
   };
 
+  /**
+   * Function to handle when drag mouse leaves the file dropper area
+   *
+   * @param e - React drag event
+   */
   const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     e.stopPropagation();
@@ -175,6 +199,11 @@ const FileDropper = (): React.ReactElement => {
     }
   };
 
+  /**
+   * Function to handle when drag mouse drop the files in the file dropper area
+   *
+   * @param e - React drag event
+   */
   const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     e.stopPropagation();
@@ -193,18 +222,17 @@ const FileDropper = (): React.ReactElement => {
     }
   };
 
+  /**
+   * Function to handle file remove from file dropper area
+   *
+   * @param fileToRemove
+   */
   const handleFileRemove = (fileToRemove: File) => {
     setDroppedFiles((allFiles) => {
       return allFiles.filter((file) => {
         return !FileDropperUtil.isEqual(fileToRemove, file);
       });
     });
-  };
-
-  const getAllFilesSize = () => {
-    return droppedFiles.reduce((acc, { size }) => {
-      return acc + size;
-    }, 0);
   };
 
   return (
@@ -243,7 +271,9 @@ const FileDropper = (): React.ReactElement => {
               <Text content="Click here to add more" />
             </AddMoreSection>
             <Text
-              content={FileDropperUtil.formatBytes(getAllFilesSize())}
+              content={FileDropperUtil.formatBytes(
+                FileDropperUtil.getAllFilesSize(droppedFiles)
+              )}
               fontWeight="bold"
               fontSize="14px"
             />
