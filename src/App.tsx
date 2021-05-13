@@ -1,7 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 
-import { Sharing } from './screens/Sharing';
+import { Sharing } from './pages/Sharing';
 import { Navbar } from './components/Navbar';
 
 const Wrapper = styled.div`
