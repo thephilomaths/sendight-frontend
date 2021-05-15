@@ -84,7 +84,7 @@ const CreateNewRoomButtonWrapper = styled.div`
 `;
 
 const Sharing = (): React.ReactElement => {
-  const [isRoomJoinedOrCreated, setIsRoomJoinedOrCreated] = useState(false);
+  const [isRoomJoinedOrCreated, setIsRoomJoined] = useState(false);
   const [currentLoadingState, setLoadingState] = useState('');
   const [currentErrorState, setErrorState] = useState('');
 
@@ -96,7 +96,9 @@ const Sharing = (): React.ReactElement => {
    * @param roomSlug - Room to connect
    */
   const handleRoomConnect = (roomSlug: string) => {
-    console.log(roomSlug);
+    RoomService.joinRoom(roomSlug);
+    setLoadingState('');
+    setIsRoomJoined(true);
   };
 
   /**
@@ -108,12 +110,13 @@ const Sharing = (): React.ReactElement => {
     setLoadingState(LOADING_STATES.create);
 
     try {
-      const slug = await RoomService.createRoom();
+      const roomSlug = await RoomService.createRoom();
 
-      window.history.pushState({}, 'room-page', `/room/${slug}`);
+      window.history.pushState({}, 'room-page', `/room/${roomSlug}`);
 
+      RoomService.joinRoom(roomSlug);
       setErrorState('');
-      setIsRoomJoinedOrCreated(true);
+      setIsRoomJoined(true);
     } catch (error) {
       setErrorState(ERROR_STATES.create);
       // eslint-disable-next-line no-console

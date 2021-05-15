@@ -1,4 +1,5 @@
 import { getSlugRoute } from '../routes';
+import { SocketService } from './SocketService';
 
 const RoomService = {
   /**
@@ -30,6 +31,17 @@ const RoomService = {
           reject(error);
         });
     });
+  },
+
+  /**
+   * Function to create socket connection with backend to relay signalling information
+   * and join room
+   *
+   * @param roomSlug - slug of room to connect
+   */
+  joinRoom: (roomSlug: string): void => {
+    SocketService.createSocketConnection();
+    SocketService.joinRoom(roomSlug);
   },
 
   /**
