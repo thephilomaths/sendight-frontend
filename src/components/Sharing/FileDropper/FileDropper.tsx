@@ -6,6 +6,7 @@ import { Button } from '../../Button';
 import { Text } from '../../Text';
 import { FileDropperUtil } from '../../../utils/FileDropper';
 import { FileItem } from './FileItem';
+import { WebRTCService } from '../../../services/WebRTCService';
 
 const Wrapper = styled.div<{ isDragging: boolean; containItems: boolean }>`
   box-sizing: border-box;
@@ -278,7 +279,9 @@ const FileDropper = (): React.ReactElement => {
               fontSize="14px"
             />
           </AddMoreAndSizeWrapper>
-          <Button width="100%">Send</Button>
+          <Button width="100%" onClick={() => {
+            WebRTCService.sendMetadata(droppedFiles);
+          }}>Send</Button>
         </>
       ) : (
         <>

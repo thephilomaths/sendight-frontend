@@ -1,37 +1,57 @@
-import { webRTCConnectionInfo } from '../config';
+import { v4 as uuidv4 } from 'uuid';
+import {webRTCConnectionInfo} from '../config';
+import {WebRTCEventsHandler} from '../handlers/WebRTCEventsHandler';
 
-let peer: RTCPeerConnection;
-let dataChannel: RTCDataChannel;
-let peerId: string;
+interface ICreateDataChannelParams {
+  label: string;
+  onOpenHandler?: (event: any) => void;
+  onMessageHandler?: (event: any) => void;
+}
 
-const WebRTCService = {
-  createNewWebRTCClient: (): RTCPeerConnection => {
-    return new RTCPeerConnection(webRTCConnectionInfo);
-  },
+class WebRTCServiceClass {
+  webRTCConnection: RTCPeerConnection;
+  peerId: string;
+  dataChannel: RTCDataChannel;
+  fileToMetadataMap: { [key: string]: Record<string, string> };
 
-  getPeer: (): RTCPeerConnection => {
-    return peer;
-  },
+  createDataChannel = ({ label, onOpenHandler, onMessageHandler }: ICreateDataChannelParams): void => {
+    this.webRTCConnection.onicecandidate = WebRTCEventsHandler.handleICECandidateEvent;
+    this.webRTCConnection.onconnectionstatechange = WebRTCEventsHandler.handleConnectionStateChange;
 
-  setPeer: (peerConnection: RTCPeerConnection): void => {
-    peer = peerConnection;
-  },
+    this.dataChannel = this.webRTCConnection.createDataChannel(label);
 
-  getPeerId: (): string => {
-    return peerId;
-  },
+    if (onOpenHandler) {
+      this.dataChannel.onopen = onOpenHandler;
+    }
 
-  setPeerId: (id: string): void => {
-    peerId = id;
-  },
+    if (onMessageHandler) {
+      this.dataChannel.onmessage = onMessageHandler;
+    }
+  }
 
-  getDataChannel: (): RTCDataChannel => {
-    return dataChannel;
-  },
+  createNewWebRTCClient = (): RTCPeerConnection => {
+    this.webRTCConnection = new RTCPeerConnection(webRTCConnectionInfo);
+    return this.webRTCConnection;
+  }
 
-  setDataChannel: (channel: RTCDataChannel): void => {
-    dataChannel = channel;
-  },
-};
+  sendMetadata = (files: File[]): void => {
+    const metadata = files.reduce((accumulator: {[key: string]: Record<string, string | number>}, file) => {
+      const uuid = uuidv4();
+      const { name, type, size } = file;
 
-export { WebRTCService };
+      accumulator[uuid] = { name, type, size };
+
+      return accumulator;
+    }, {});
+
+    this.createDataChannel({ label: 'metadataChannel' });
+
+    this.dataChannel.send(JSON.stringify(metadata));
+  }
+
+  // sendFile = (file: File, label: string): void => {
+  //   this.createDataChannel(label);
+  // }
+}
+
+export const WebRTCService = new WebRTCServiceClass();

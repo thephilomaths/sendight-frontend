@@ -4,60 +4,51 @@ import { WebRTCEventsHandler } from './WebRTCEventsHandler';
 
 const SocketEventHandler = {
   handleOffer: (offer: RTCSessionDescriptionInit): void => {
-    const peer = WebRTCService.getPeer();
-    const peerId = WebRTCService.getPeerId();
+    const { webRTCConnection, peerId } = WebRTCService;
 
-    peer.ondatachannel = WebRTCEventsHandler.handleDataChannelEvent;
+    webRTCConnection.ondatachannel = WebRTCEventsHandler.handleDataChannelEvent;
 
-    peer
+    webRTCConnection
       .setRemoteDescription(offer)
       .then(() => {
-        return peer.createAnswer();
+        return webRTCConnection.createAnswer();
       })
       .then((answer) => {
-        peer.setLocalDescription(answer).then(() => {
+        webRTCConnection.setLocalDescription(answer).then(() => {
           SocketService.sendPayload('answer', { target: peerId, answer });
         });
       });
   },
 
   handleAnswer: (answer: RTCSessionDescriptionInit): void => {
-    const peer = WebRTCService.getPeer();
+    const { webRTCConnection } = WebRTCService;
 
-    peer.setRemoteDescription(answer);
+    webRTCConnection.setRemoteDescription(answer);
   },
 
   handleICECandidates: (candidate: RTCIceCandidateInit): void => {
-    const peer = WebRTCService.getPeer();
+    const { webRTCConnection } = WebRTCService;
     const iceCandidate = new RTCIceCandidate(candidate);
 
-    peer.addIceCandidate(iceCandidate);
+    webRTCConnection.addIceCandidate(iceCandidate);
   },
 
   handlePeerJoined: (payload: { id: string; role: string }): void => {
     const peerId = payload.id;
-    const peer = WebRTCService.createNewWebRTCClient();
-
-    peer.onicecandidate = WebRTCEventsHandler.handleICECandidateEvent;
-    peer.onconnectionstatechange =
-      WebRTCEventsHandler.handleConnectionStateChange;
+    const webRTCConnection = WebRTCService.createNewWebRTCClient();
 
     if (payload.role === 'peer') {
-      // This means the other user is peer and this is creator
-      const dataChannel = peer.createDataChannel('dataChannel');
-
-      WebRTCService.setDataChannel(dataChannel);
-
+      // This means the other user is peer and current user is creator
       // Create offer
-      peer.createOffer().then((offer) => {
-        peer.setLocalDescription(offer).then(() => {
+      webRTCConnection.createOffer().then((offer) => {
+        webRTCConnection.setLocalDescription(offer).then(() => {
           SocketService.sendPayload('offer', { target: peerId, offer });
         });
       });
     }
 
-    WebRTCService.setPeer(peer);
-    WebRTCService.setPeerId(peerId);
+    console.log(WebRTCService);
+    WebRTCService.peerId = peerId;
   },
 };
 

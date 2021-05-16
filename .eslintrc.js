@@ -38,7 +38,8 @@ module.exports = {
     'quotes': ['error', 'single'],
     'import/prefer-default-export': 'off',
     'arrow-parens': ['error', 'always'],
-    'arrow-body-style': ['error', 'always']
+    'arrow-body-style': ['error', 'always'],
+    'lines-between-class-members': 'off',
   },
   'settings': {
     'import/resolver': {

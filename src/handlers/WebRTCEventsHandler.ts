@@ -1,27 +1,44 @@
-import { SocketService } from '../services/SocketService';
-import { WebRTCService } from '../services/WebRTCService';
+import {SocketService} from '../services/SocketService';
+import {WebRTCService} from '../services/WebRTCService';
 
 const WebRTCEventsHandler = {
   handleICECandidateEvent: (event: RTCPeerConnectionIceEvent): void => {
     const { candidate } = event;
 
     if (candidate) {
-      const peerId = WebRTCService.getPeerId();
-
+      const { peerId }= WebRTCService;
       SocketService.sendPayload('ice-candidate', { target: peerId, candidate });
     }
   },
 
   handleDataChannelEvent: (event: RTCDataChannelEvent): void => {
-    const dataChannel = event.channel;
+    const { label } = event.channel;
+    const { channel } = event;
 
-    WebRTCService.setDataChannel(dataChannel);
+    if (label.startsWith('file')) {
+      const fileUUID: string = label.split('-')[1];
+      const fileName: string = WebRTCService.fileToMetadataMap[fileUUID].name
+      const fileBuffer: Array<ArrayBuffer> = [];
+      channel.onmessage = (e) => {
+        fileBuffer.push(e.data);
+      }
+      const a = document.createElement('a');
+      const blob = new Blob(fileBuffer);
+      a.href = window.URL.createObjectURL(blob);
+      a.download = fileName;
+      a.click();
+      a.remove();
+    } else if (label === 'metaDataChannel') {
+      channel.onmessage = (e) => {
+        WebRTCService.fileToMetadataMap = JSON.parse(e.data);
+      }
+    }
   },
 
   handleConnectionStateChange: (): void => {
-    const peer = WebRTCService.getPeer();
+    const { webRTCConnection } = WebRTCService;
 
-    switch (peer.connectionState) {
+    switch (webRTCConnection.connectionState) {
       case 'connected':
         console.log('WebRTC connection created');
         break;
