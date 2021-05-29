@@ -1,5 +1,5 @@
 import { getSlugRoute } from '../routes';
-import { SocketService } from './SocketService';
+import { SocketHandler } from '../handlers/SocketHandler';
 
 const RoomService = {
   /**
@@ -40,8 +40,8 @@ const RoomService = {
    * @param roomSlug - slug of room to connect
    */
   joinRoom: (roomSlug: string): void => {
-    SocketService.createSocketConnection();
-    SocketService.joinRoom(roomSlug);
+    SocketHandler.createSocketConnection();
+    SocketHandler.joinRoom(roomSlug);
   },
 
   /**

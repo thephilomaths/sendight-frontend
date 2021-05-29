@@ -1,36 +1,5 @@
 const FileDropperUtil = {
   /**
-   * Function to check if there exist a duplicate to new file in the old
-   * files list
-   *
-   * @param newFile
-   * @param oldFiles
-   * @returns boolean - Whether duplicate exist or not
-   */
-  isDuplicateInList: (newFile: File, oldFiles: Array<File>): boolean => {
-    return oldFiles.some((file) => {
-      return FileDropperUtil.isEqual(newFile, file);
-    });
-  },
-
-  /**
-   * Function to check if two files are equal
-   *
-   * TODO: A very naive method, try to implement a better one
-   *
-   * @param file1
-   * @param file2
-   * @returns boolean - Whether two files are equal or not
-   */
-  isEqual: (file1: File, file2: File): boolean => {
-    return (
-      file1.name === file2.name &&
-      file1.size === file2.size &&
-      file1.lastModified === file2.lastModified
-    );
-  },
-
-  /**
    * Function to convert bytes into human readable format
    *
    * @param bytes
@@ -55,18 +24,20 @@ const FileDropperUtil = {
    *
    * @param oldFiles
    * @param newFiles
-   * @returns Array<File> - File list without duplicates
+   * @returns {[key: string]: File} - File object without duplicates
    */
-  getUniqueFiles: (oldFiles: Array<File>, newFiles: FileList): Array<File> => {
-    const filesToAdd = Array.from(newFiles).reduce((acc: Array<File>, file) => {
-      if (!FileDropperUtil.isDuplicateInList(file, oldFiles)) {
-        acc.push(file);
-      }
+  getUniqueFiles: async (oldFiles: { [key: string]: File }, newFiles: FileList): Promise<{ [key: string]: File }> => {
+    const filesToAdd: { [key: string]: File } = {};
 
-      return acc;
-    }, []);
+    for (const file of Array.from(newFiles)) {
+      const fileDataString = file.name + file.type + file.size + file.lastModified;
 
-    return [...oldFiles, ...filesToAdd];
+      const fileDataHash = await FileDropperUtil.getSHA256(fileDataString);
+
+      filesToAdd[fileDataHash] = file;
+    }
+
+    return { ...oldFiles, ...filesToAdd };
   },
 
   /**
@@ -75,10 +46,26 @@ const FileDropperUtil = {
    * @param files - List of all files whose size is to be calculated
    * @returns number - Total file size in bytes
    */
-  getAllFilesSize: (files: Array<File>): number => {
-    return files.reduce((acc, { size }) => {
-      return acc + size;
+  getAllFilesSize: (filesObject: { [key: string]: File }): number => {
+    return Object.keys(filesObject).reduce((acc, fileHash) => {
+      return acc + filesObject[fileHash].size;
     }, 0);
+  },
+
+  getSHA256: async (message: string): Promise<string> => {
+    const msgBuffer = new TextEncoder().encode(message);
+
+    const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+
+    const hashHex = hashArray
+      .map((b) => {
+        return b.toString(16).padStart(2, '0');
+      })
+      .join('');
+
+    return hashHex;
   },
 };
 

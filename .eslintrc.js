@@ -40,6 +40,8 @@ module.exports = {
     'arrow-parens': ['error', 'always'],
     'arrow-body-style': ['error', 'always'],
     'lines-between-class-members': 'off',
+    'no-restricted-syntax': 'off',
+    'no-await-in-loop': 'off'
   },
   'settings': {
     'import/resolver': {

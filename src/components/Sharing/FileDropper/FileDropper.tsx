@@ -6,7 +6,7 @@ import { Button } from '../../Button';
 import { Text } from '../../Text';
 import { FileDropperUtil } from '../../../utils/FileDropper';
 import { FileItem } from './FileItem';
-import { WebRTCService } from '../../../services/WebRTCService';
+import { WebRTCHandler } from '../../../handlers/WebRTCHandler';
 
 const Wrapper = styled.div<{ isDragging: boolean; containItems: boolean }>`
   box-sizing: border-box;
@@ -29,9 +29,7 @@ const Wrapper = styled.div<{ isDragging: boolean; containItems: boolean }>`
           align-items: flex-start;
         `
       : `
-          border: 2px ${
-            isDragging ? 'solid #E91E63' : 'dashed rgba(74, 74, 79, 1)'
-          };
+          border: 2px ${isDragging ? 'solid #E91E63' : 'dashed rgba(74, 74, 79, 1)'};
           padding: 24px;
 
           &:hover {
@@ -125,7 +123,7 @@ const IconStyles = {
 
 const FileDropper = (): React.ReactElement => {
   const [isDragging, setIsDragging] = useState(false);
-  const [droppedFiles, setDroppedFiles] = useState<Array<File>>([]);
+  const [droppedFiles, setDroppedFiles] = useState<{ [key: string]: File }>({});
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const dragCounter = useRef(0);
@@ -145,14 +143,14 @@ const FileDropper = (): React.ReactElement => {
    *
    * @param e - React change event
    */
-  const onFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const onFileInputChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     e.preventDefault();
     const { files } = e.target;
 
     if (files) {
-      setDroppedFiles((oldFiles) => {
-        return FileDropperUtil.getUniqueFiles(oldFiles, files);
-      });
+      const newFilesObject = await FileDropperUtil.getUniqueFiles(droppedFiles, files);
+
+      setDroppedFiles(newFilesObject);
     }
   };
 
@@ -205,19 +203,20 @@ const FileDropper = (): React.ReactElement => {
    *
    * @param e - React drag event
    */
-  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+  const handleDrop = async (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     e.stopPropagation();
 
     setIsDragging(false);
     dragCounter.current = 0;
 
+    // New files
     const draggedFiles = e.dataTransfer.files;
 
     if (draggedFiles) {
-      setDroppedFiles((oldFiles) => {
-        return FileDropperUtil.getUniqueFiles(oldFiles, draggedFiles);
-      });
+      const newFilesObject = await FileDropperUtil.getUniqueFiles(droppedFiles, draggedFiles);
+
+      setDroppedFiles(newFilesObject);
 
       e.dataTransfer.clearData();
     }
@@ -228,39 +227,34 @@ const FileDropper = (): React.ReactElement => {
    *
    * @param fileToRemove
    */
-  const handleFileRemove = (fileToRemove: File) => {
-    setDroppedFiles((allFiles) => {
-      return allFiles.filter((file) => {
-        return !FileDropperUtil.isEqual(fileToRemove, file);
-      });
-    });
+  const handleFileRemove = (fileToRemoveHash: string) => {
+    const { [fileToRemoveHash]: _fileToRemove, ...otherFiles } = droppedFiles;
+
+    setDroppedFiles(otherFiles);
   };
 
   return (
     <Wrapper
       onClick={() => {
-        if (!droppedFiles.length) onAddClickHandler();
+        if (!Object.keys(droppedFiles).length) onAddClickHandler();
       }}
       onDragOver={handleDrag}
       onDragEnter={handleDragEnter}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
       isDragging={isDragging}
-      containItems={!!droppedFiles.length}
+      containItems={!!Object.keys(droppedFiles).length}
     >
-      <File
-        type="file"
-        ref={fileInputRef}
-        onChange={onFileInputChange}
-        multiple
-      />
-      {droppedFiles.length > 0 ? (
+      <File type="file" ref={fileInputRef} onChange={onFileInputChange} multiple />
+      {Object.keys(droppedFiles).length > 0 ? (
         <>
           <DroppedFilesWrapper>
-            {droppedFiles.map((file) => {
+            {Object.keys(droppedFiles).map((fileHash) => {
+              const file = droppedFiles[fileHash];
+
               return (
-                <FileItemWrapper>
-                  <FileItem file={file} onRemove={handleFileRemove} />
+                <FileItemWrapper key={file.lastModified}>
+                  <FileItem file={file} fileHash={fileHash} onRemove={handleFileRemove} />
                 </FileItemWrapper>
               );
             })}
@@ -272,37 +266,33 @@ const FileDropper = (): React.ReactElement => {
               <Text content="Click here to add more" />
             </AddMoreSection>
             <Text
-              content={FileDropperUtil.formatBytes(
-                FileDropperUtil.getAllFilesSize(droppedFiles)
-              )}
+              content={FileDropperUtil.formatBytes(FileDropperUtil.getAllFilesSize(droppedFiles))}
               fontWeight="bold"
               fontSize="14px"
             />
           </AddMoreAndSizeWrapper>
-          <Button width="100%" onClick={() => {
-            WebRTCService.sendMetadata(droppedFiles);
-          }}>Send</Button>
+          <Button
+            width="100%"
+            onClick={() => {
+              WebRTCHandler.sendMetadata(droppedFiles);
+              WebRTCHandler.sendFiles(droppedFiles);
+            }}
+          >
+            Send
+          </Button>
         </>
       ) : (
         <>
           <AddCircleOutlineIcon style={IconStyles} />
           <InfoText>
-            <Text
-              content="Drag and drop files"
-              fontSize="18px"
-              fontWeight="800"
-              letterSpacing="1px"
-            />
+            <Text content="Drag and drop files" fontSize="18px" fontWeight="800" letterSpacing="1px" />
           </InfoText>
           <InfoSubText>
             <Text content="or click to send files" />
           </InfoSubText>
           <Button>Select files to send</Button>
           <NoteText>
-            <Text
-              content="Make sure you trust your recipient when sharing sensitive data."
-              fontSize="14px"
-            />
+            <Text content="Make sure you trust your recipient when sharing sensitive data." fontSize="14px" />
           </NoteText>
         </>
       )}

@@ -1,9 +1,9 @@
 import { io, Socket } from 'socket.io-client';
 
 import { socketURL } from '../routes';
-import { SocketEventHandler } from '../handlers/SocketEventsHandler';
+import { SocketEventHandler } from '../events/SocketEvents';
 
-class SocketServiceClass {
+class SocketClass {
   private socket: Socket;
 
   private registerRoutes = (): void => {
@@ -28,11 +28,11 @@ class SocketServiceClass {
     this.socket = io(socketURL);
     this.registerRoutes();
     return this.socket;
-  }
+  };
 
   getSocketInstance = (): Socket => {
     return this.socket;
-  }
+  };
 
   joinRoom = (roomSlug: string): void => {
     if (!this.socket) {
@@ -40,7 +40,7 @@ class SocketServiceClass {
     }
 
     this.socket.emit('join-room', roomSlug);
-  }
+  };
 
   sendPayload = (event: string, payload: any): void => {
     if (!this.socket) {
@@ -48,7 +48,7 @@ class SocketServiceClass {
     }
 
     this.socket.emit(event, payload);
-  }
+  };
 }
 
-export const SocketService = new SocketServiceClass();
+export const SocketHandler = new SocketClass();

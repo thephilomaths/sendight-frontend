@@ -51,11 +51,12 @@ const RemoveIconStyles = {
 
 interface IProps {
   file: File;
-  onRemove: (fileToRemove: File) => void;
+  fileHash: string;
+  onRemove: (fileToRemoveHash: string) => void;
 }
 
 const FileItem = (props: IProps): React.ReactElement => {
-  const { file, onRemove } = props;
+  const { file, fileHash, onRemove } = props;
 
   return (
     <Wrapper>
@@ -63,22 +64,13 @@ const FileItem = (props: IProps): React.ReactElement => {
         <FileIcon style={FileIconStyles} />
       </FileIconWrapper>
       <FileDetails>
-        <Text
-          content={file.name}
-          maxWidth="275px"
-          fontWeight="bolder"
-          title={file.name}
-          truncate
-        />
-        <Text
-          content={FileDropperUtil.formatBytes(file.size)}
-          fontSize="12px"
-        />
+        <Text content={file.name} maxWidth="275px" fontWeight="bolder" title={file.name} truncate />
+        <Text content={FileDropperUtil.formatBytes(file.size)} fontSize="12px" />
       </FileDetails>
       <RemoveButton
         type="button"
         onClick={() => {
-          return onRemove(file);
+          return onRemove(fileHash);
         }}
       >
         <RemoveIcon style={RemoveIconStyles} />

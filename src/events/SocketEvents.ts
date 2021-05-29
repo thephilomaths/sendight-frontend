@@ -1,10 +1,11 @@
-import { SocketService } from '../services/SocketService';
-import { WebRTCService } from '../services/WebRTCService';
-import { WebRTCEventsHandler } from './WebRTCEventsHandler';
+import { META_DATA_CHANNEL_LABEL } from '../constants/WebRTC';
+import { SocketHandler } from '../handlers/SocketHandler';
+import { WebRTCHandler } from '../handlers/WebRTCHandler';
+import { WebRTCEventsHandler } from './WebRTCEvents';
 
 const SocketEventHandler = {
   handleOffer: (offer: RTCSessionDescriptionInit): void => {
-    const { webRTCConnection, peerId } = WebRTCService;
+    const { webRTCConnection, peerId } = WebRTCHandler;
 
     webRTCConnection.ondatachannel = WebRTCEventsHandler.handleDataChannelEvent;
 
@@ -15,40 +16,42 @@ const SocketEventHandler = {
       })
       .then((answer) => {
         webRTCConnection.setLocalDescription(answer).then(() => {
-          SocketService.sendPayload('answer', { target: peerId, answer });
+          SocketHandler.sendPayload('answer', { target: peerId, answer });
         });
       });
   },
 
   handleAnswer: (answer: RTCSessionDescriptionInit): void => {
-    const { webRTCConnection } = WebRTCService;
+    const { webRTCConnection } = WebRTCHandler;
 
     webRTCConnection.setRemoteDescription(answer);
   },
 
   handleICECandidates: (candidate: RTCIceCandidateInit): void => {
-    const { webRTCConnection } = WebRTCService;
+    const { webRTCConnection } = WebRTCHandler;
     const iceCandidate = new RTCIceCandidate(candidate);
 
     webRTCConnection.addIceCandidate(iceCandidate);
   },
 
-  handlePeerJoined: (payload: { id: string; role: string }): void => {
+  handlePeerJoined: async (payload: { id: string; role: string }): Promise<void> => {
     const peerId = payload.id;
-    const webRTCConnection = WebRTCService.createNewWebRTCClient();
+
+    WebRTCHandler.peerId = peerId;
+
+    WebRTCHandler.createWebRTCClient();
 
     if (payload.role === 'peer') {
       // This means the other user is peer and current user is creator
-      // Create offer
-      webRTCConnection.createOffer().then((offer) => {
-        webRTCConnection.setLocalDescription(offer).then(() => {
-          SocketService.sendPayload('offer', { target: peerId, offer });
-        });
-      });
-    }
 
-    console.log(WebRTCService);
-    WebRTCService.peerId = peerId;
+      // Create first metaData channel
+      WebRTCHandler.createMetaDataChannel();
+
+      // Create offer
+      const offer = await WebRTCHandler.createOffer();
+
+      SocketHandler.sendPayload('offer', { target: peerId, offer });
+    }
   },
 };
 
