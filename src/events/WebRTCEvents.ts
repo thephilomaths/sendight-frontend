@@ -27,29 +27,19 @@ const WebRTCEventsHandler = {
       channel.binaryType = 'arraybuffer';
 
       const fileUUID: string = label.split('-')[1];
-      const fileName: string = WebRTCHandler.fileToMetadataMap[fileUUID].name;
+      // const fileName: string = WebRTCHandler.fileToMetadataMap[fileUUID].name;
+      const fileName = 'asdasdadadsasdasd.mp4';
 
       channel.onmessage = async (e) => {
         const { data } = e;
 
-        console.log('Chunk', data);
-
         if (data !== END_OF_FILE_MESSAGE) {
-          console.log('DATA');
-
           fileBuffer.push(data);
         } else {
           console.log('END OF FILE');
 
-          const finalArrayBuffer = fileBuffer.reduce((acc, arrayBuffer) => {
-            const tmp = new Uint8Array(acc.byteLength + arrayBuffer.byteLength);
-            tmp.set(new Uint8Array(acc), 0);
-            tmp.set(new Uint8Array(arrayBuffer), acc.byteLength);
-            return tmp;
-          }, new Uint8Array());
-
           const a = document.createElement('a');
-          const blob = new Blob([finalArrayBuffer]);
+          const blob = new Blob(fileBuffer);
 
           a.href = window.URL.createObjectURL(blob);
           a.download = fileName;

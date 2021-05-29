@@ -81,22 +81,61 @@ class WebRTC {
       const file = filesObject[fileHash];
 
       const handleDataChannelOpen = async () => {
-        const arrayBuffer = await file.arrayBuffer();
+        // const arrayBuffer = await file.arrayBuffer();
         const channel = this.dataChannelsMap[label];
 
-        let x = 0;
-        for (let i = 0; i < arrayBuffer.byteLength; i += MAXIMUM_MESSAGE_SIZE) {
-          setTimeout(() => {
-            console.log('chunk sent', arrayBuffer.slice(i, i + MAXIMUM_MESSAGE_SIZE));
+        const chunkSize = 16384;
+        let count = 0;
 
-            channel.send(arrayBuffer.slice(i, i + MAXIMUM_MESSAGE_SIZE));
-          }, 50 * x);
-          x += 1;
-        }
+        const fileReader = new FileReader();
+        fileReader.addEventListener('error', (error) => {
+          // return console.error('Error reading file:', error);
+        });
+        fileReader.addEventListener('abort', (event) => {
+          // return console.log('File reading aborted:', event);
+        });
 
-        setTimeout(() => {
-          channel.send(END_OF_FILE_MESSAGE);
-        }, x * 50);
+        let offset = 0;
+
+        const readSlice = (o: number) => {
+          // console.log('readSlice ', o);
+          const slice = file.slice(offset, o + chunkSize);
+          fileReader.readAsArrayBuffer(slice);
+        };
+
+        fileReader.addEventListener('load', (e: any) => {
+          // console.log('FileRead.onload ', e);
+          channel.send(e.target.result);
+          offset += e.target.result.byteLength;
+          // console.log(offset);
+          count += 1;
+
+          if (count % 100 === 0) {
+            console.log(count);
+          }
+
+          if (offset < file.size) {
+            readSlice(offset);
+          } else {
+            channel.send('EOF');
+          }
+        });
+
+        readSlice(0);
+
+        // let x = 0;
+        // for (let i = 0; i < arrayBuffer.byteLength; i += MAXIMUM_MESSAGE_SIZE) {
+        //   setTimeout(() => {
+        //     console.log('chunk sent', arrayBuffer.slice(i, i + MAXIMUM_MESSAGE_SIZE));
+
+        //     channel.send(arrayBuffer.slice(i, i + MAXIMUM_MESSAGE_SIZE));
+        //   }, 50 * x);
+        //   x += 1;
+        // }
+
+        // setTimeout(() => {
+        //   channel.send(END_OF_FILE_MESSAGE);
+        // }, x * 50);
       };
 
       this.createDataChannel({ label, onOpenHandler: handleDataChannelOpen });
