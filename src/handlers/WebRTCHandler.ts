@@ -1,3 +1,4 @@
+import SelectInput from '@material-ui/core/Select/SelectInput';
 import { webRTCConnectionInfo } from '../config';
 import { END_OF_FILE_MESSAGE, MAXIMUM_MESSAGE_SIZE, META_DATA_CHANNEL_LABEL } from '../constants/WebRTC';
 import { WebRTCEventsHandler } from '../events/WebRTCEvents';
@@ -89,39 +90,88 @@ class WebRTC {
 
         const fileReader = new FileReader();
         fileReader.addEventListener('error', (error) => {
-          // return console.error('Error reading file:', error);
+          return console.error('Error reading file:', error);
         });
         fileReader.addEventListener('abort', (event) => {
-          // return console.log('File reading aborted:', event);
+          return console.log('File reading aborted:', event);
         });
 
         let offset = 0;
 
         const readSlice = (o: number) => {
           // console.log('readSlice ', o);
-          const slice = file.slice(offset, o + chunkSize);
-          fileReader.readAsArrayBuffer(slice);
+          return file.slice(offset, o + chunkSize);
         };
 
-        fileReader.addEventListener('load', (e: any) => {
-          // console.log('FileRead.onload ', e);
-          channel.send(e.target.result);
-          offset += e.target.result.byteLength;
-          // console.log(offset);
-          count += 1;
+        const sleep = async (ms: number) => {
+          return new Promise((resolve) => {
+            setTimeout(resolve, ms)
+          });
+        }
 
-          if (count % 100 === 0) {
-            console.log(count);
-          }
+        // fileReader.addEventListener('load', async (e: any) => {
+        //   // console.log('FileRead.onload ', e);
 
-          if (offset < file.size) {
-            readSlice(offset);
-          } else {
-            channel.send('EOF');
-          }
+        //   if (offset === 0) {
+        //     channel.send(e.target.result);
+        //   }
+
+        //   try {
+        //     channel.onbufferedamountlow = (ev) => {
+        //       console.log('Low: ', ev);
+        //       channel.send(e.target.result);
+
+        //       offset += e.target.result.byteLength;
+        //       // console.log(offset);
+        //       count += 1;
+    
+        //       if (count % 100 === 0) {
+        //         console.log(count);
+        //       }
+    
+        //       if (offset < file.size) {
+        //         readSlice(offset);
+        //       } else {
+        //         channel.send('EOF');
+        //       }
+        //     }
+        //   } catch(err) {
+        //     console.log('herereerr')
+        //     await sleep(2000);
+        //   }
+        // });
+
+        let slice = readSlice(0);
+        slice.arrayBuffer().then((buffer) => {
+          channel.send(buffer);
         });
+        offset += slice.size;
+        console.log(file.size / slice.size);
 
-        readSlice(0);
+        channel.onbufferedamountlow = (ev) => {
+          // console.log('Low: ', ev);
+
+          slice = readSlice(offset);
+          slice.arrayBuffer().then((buffer) => {
+            channel.send(buffer);
+
+            offset += slice.size;
+            // console.log(offset);
+            count += 1;
+
+            if (count % 100 === 0) {
+              console.log(count);
+            }
+
+            console.log('Offset: ', offset);
+            console.log('File: ', file.size);
+
+            if (offset >= file.size) {
+              channel.send('EOF');
+              channel.close();
+            }
+          });
+        }
 
         // let x = 0;
         // for (let i = 0; i < arrayBuffer.byteLength; i += MAXIMUM_MESSAGE_SIZE) {
