@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 
+import RoomService from '../../services/RoomService';
+
 import { FileDropper, LoadingState } from '../../components/Sharing';
 import { Text } from '../../components/Text';
 import SendIllustration from '../../assets/illustrations/send.svg';
@@ -12,7 +14,6 @@ import {
 } from '../../constants/Sharing';
 import { ErrorState } from '../../components/Sharing/ErrorState';
 import { Button } from '../../components/Button';
-import { RoomService } from '../../services/RoomService';
 
 const Wrapper = styled.div`
   display: flex;

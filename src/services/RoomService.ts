@@ -1,7 +1,8 @@
+import SocketService from './SocketService';
+import { SOCKET_EVENTS } from '../constants/SocketEvents';
 import { getSlugRoute } from '../routes';
-import { SocketHandler } from '../handlers/SocketHandler';
 
-const RoomService = {
+class RoomService {
   /**
    * Function to create a new room at the server
    * The room is used to transfer signalling information for
@@ -9,7 +10,7 @@ const RoomService = {
    *
    * @returns Promise to return room slug
    */
-  createRoom: (): Promise<string> => {
+  createRoom = (): Promise<string> => {
     return new Promise((resolve, reject) => {
       fetch(getSlugRoute)
         .then((response) => {
@@ -31,7 +32,7 @@ const RoomService = {
           reject(error);
         });
     });
-  },
+  }
 
   /**
    * Function to create socket connection with backend to relay signalling information
@@ -39,27 +40,27 @@ const RoomService = {
    *
    * @param roomSlug - slug of room to connect
    */
-  joinRoom: (roomSlug: string): void => {
-    SocketHandler.createSocketConnection();
-    SocketHandler.joinRoom(roomSlug);
-  },
+  joinRoom = (roomSlug: string): void => {
+    SocketService.createSocketConnection();
+    SocketService.emitEvent(SOCKET_EVENTS.JOIN_ROOM, roomSlug);
+  }
 
   /**
    * Function to return the slug currently present in address bar
    *
    * @returns roomSlug - A kind of human readable room id
    */
-  getCurrentRoomSlug: (): string | null => {
+  getCurrentRoomSlug = (): string | null => {
     const pathNameRegex = new RegExp(
       /\/room\/(?<roomSlug>[a-zA-Z]+-[a-zA-Z]+)$/
     );
     const currentUrl = new URL(window.location.href);
 
-    const { groups: { roomSlug = null } = {} } =
-      pathNameRegex.exec(currentUrl.pathname) || {};
+    const {groups: {roomSlug = null} = {}} =
+    pathNameRegex.exec(currentUrl.pathname) || {};
 
     return roomSlug;
-  },
-};
+  }
+}
 
-export { RoomService };
+export default new RoomService();
