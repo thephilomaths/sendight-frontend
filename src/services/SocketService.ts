@@ -4,7 +4,7 @@ import { socketURL } from '../routes';
 class SocketService {
   private socket: Socket;
 
-  createSocketConnection = (): void  => {
+  constructor() {
     this.socket = io(socketURL);
   }
 
