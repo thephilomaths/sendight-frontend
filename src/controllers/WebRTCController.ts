@@ -1,8 +1,14 @@
 import SocketService from '../services/SocketService';
-import { webRTCConnectionInfo } from '../config';
-import { SOCKET_EVENTS } from '../constants/SocketEvents';
-import { META_DATA_CHANNEL_LABEL, BUFFERED_AMOUNT_LOW_THRESHOLD, MAXIMUM_MESSAGE_SIZE, START_OF_FILE_MESSAGE, END_OF_FILE_MESSAGE } from '../constants/WebRTC';
+import {webRTCConnectionInfo} from '../config';
+import {SOCKET_EVENTS} from '../constants/SocketEvents';
+import {
+  END_OF_FILE_MESSAGE,
+  MAXIMUM_MESSAGE_SIZE,
+  META_DATA_CHANNEL_LABEL,
+  START_OF_FILE_MESSAGE
+} from '../constants/WebRTC';
 import DataStore from '../stores/DataStore';
+import {WebRTCConnectionStatus} from '../types/WebRTC';
 
 interface ICreateDataChannelParams {
   label: string;
@@ -10,6 +16,7 @@ interface ICreateDataChannelParams {
   onMessageHandler?: (event: MessageEvent) => void;
   onBufferedAmountLowHandler?: (event: Event) => void;
 }
+
 
 class WebRTCController {
   private peerId: string;
@@ -116,16 +123,18 @@ class WebRTCController {
       const label = `file-${fileHash}`;
       const file = filesObject[fileHash];
 
-      DataStore.setFileSendProgress(fileHash, 0);
+      if (!DataStore.filesSendProgress[fileHash]) {
+        DataStore.setFileSendProgress(fileHash, 0);
 
-      const dataChannel = this.createDataChannel({
-        label,
-        onOpenHandler: (event) => { return this.handleFileDataChannelOpenWebRTCEvent(event, dataChannel) },
-        onBufferedAmountLowHandler: (event) => { return this.handleBufferedAmountLowWebRTCEvent(event, dataChannel, fileHash, file) },
-      });
+        const dataChannel = this.createDataChannel({
+          label,
+          onOpenHandler: (event) => { return this.handleFileDataChannelOpenWebRTCEvent(event, dataChannel) },
+          onBufferedAmountLowHandler: (event) => { return this.handleBufferedAmountLowWebRTCEvent(event, dataChannel, fileHash, file) },
+        });
 
-      // dataChannel.bufferedAmountLowThreshold = BUFFERED_AMOUNT_LOW_THRESHOLD;
-      dataChannel.binaryType = 'arraybuffer';
+        // dataChannel.bufferedAmountLowThreshold = BUFFERED_AMOUNT_LOW_THRESHOLD;
+        dataChannel.binaryType = 'arraybuffer';
+      }
     });
   };
 
@@ -158,16 +167,16 @@ class WebRTCController {
   handleConnectionStateChangeWebRTCEvent = (): void => {
     switch (this.webRTCConnection.connectionState) {
       case 'connected':
-        console.log('WebRTC connection created');
+        DataStore.setWebRTCConnectionStatus(WebRTCConnectionStatus.CONNECTED);
         break;
       case 'disconnected':
-        console.log('WebRTC connection disconnected');
+        DataStore.setWebRTCConnectionStatus(WebRTCConnectionStatus.DISCONNECTED);
         break;
       case 'failed':
-        console.log('Failed to create WebRTC connection');
+        DataStore.setWebRTCConnectionStatus(WebRTCConnectionStatus.FAILED);
         break;
       case 'closed':
-        console.log('Closed WebRTC connection');
+        DataStore.setWebRTCConnectionStatus(WebRTCConnectionStatus.CLOSED);
         break;
       default:
         break;
@@ -218,6 +227,8 @@ class WebRTCController {
 
       SocketService.emitEvent(SOCKET_EVENTS.OFFER, { target: this.peerId, offer });
     }
+
+    DataStore.setPeerConnectionStatus(true);
   }
 
   handleOfferEvent = async (offer: RTCSessionDescriptionInit): Promise<void> => {

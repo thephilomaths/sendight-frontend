@@ -1,7 +1,8 @@
-import { action, observable } from 'mobx';
+import { action, observable, makeAutoObservable } from 'mobx';
+import {WebRTCConnectionStatus} from '../types/WebRTC';
 
 interface IFileHashToMetadataMap {
-  [fileHash: string]: Record<string, string>
+  [fileHash: string]: File
 }
 
 interface IFilesProgress {
@@ -13,27 +14,30 @@ interface IFileHashToDataMap {
 }
 
 class DataStore {
-  @observable fileHashToMetadataMap: IFileHashToMetadataMap = {};
-  @observable filesSendProgress: IFilesProgress = {};
-  @observable filesReceiveProgress: IFilesProgress = {};
-  @observable fileHashToDataMap: IFileHashToDataMap = {}
+  peerConnectionStatus = false;
+  webRTCConnectionStatus: WebRTCConnectionStatus = WebRTCConnectionStatus.DISCONNECTED;
+  fileHashToMetadataMap: IFileHashToMetadataMap = {};
+  filesSendProgress: IFilesProgress = {};
+  filesReceiveProgress: IFilesProgress = {};
+  fileHashToDataMap: IFileHashToDataMap = {}
+
+  constructor() {
+    makeAutoObservable(this);
+  }
 
   @action
   setFileHashToMetadataMap = (fileHashToMetadataMap: IFileHashToMetadataMap) => {
     this.fileHashToMetadataMap = fileHashToMetadataMap;
-    console.log('Metadata', fileHashToMetadataMap);
   }
 
   @action
   setFileSendProgress = (fileHash: string, progress: number) => {
     this.filesSendProgress[fileHash] = progress;
-    console.log('Send progress', this.filesSendProgress)
   }
 
   @action
   setFileReceiveProgress = (fileHash: string, progress: number) => {
     this.filesReceiveProgress[fileHash] = progress;
-    console.log('Receive progress', this.filesReceiveProgress);
   }
 
   @action
@@ -42,8 +46,17 @@ class DataStore {
       this.fileHashToDataMap[fileHash] = [];
     }
     this.fileHashToDataMap[fileHash].push(buffer);
+  }
 
-    console.log('Received data', buffer);
+  @action
+  setPeerConnectionStatus = (peerConnectionStatus: boolean) => {
+    this.peerConnectionStatus = peerConnectionStatus;
+  }
+
+  @action
+  setWebRTCConnectionStatus = (webRTCConnectionStatus: WebRTCConnectionStatus) => {
+    this.webRTCConnectionStatus = webRTCConnectionStatus;
+    console.log('Connection status: ', webRTCConnectionStatus);
   }
 }
 
