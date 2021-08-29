@@ -41,7 +41,6 @@ class RoomService {
    * @param roomSlug - slug of room to connect
    */
   joinRoom = (roomSlug: string): void => {
-    SocketService.createSocketConnection();
     SocketService.emitEvent(SOCKET_EVENTS.JOIN_ROOM, roomSlug);
   }
 
@@ -56,8 +55,8 @@ class RoomService {
     );
     const currentUrl = new URL(window.location.href);
 
-    const {groups: {roomSlug = null} = {}} =
-    pathNameRegex.exec(currentUrl.pathname) || {};
+    const { groups: { roomSlug = null } = {} } =
+      pathNameRegex.exec(currentUrl.pathname) || {};
 
     return roomSlug;
   }
