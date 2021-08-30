@@ -1,6 +1,6 @@
 import SocketService from '../services/SocketService';
-import {webRTCConnectionInfo} from '../config';
-import {SOCKET_EVENTS} from '../constants/SocketEvents';
+import { webRTCConnectionInfo } from '../config';
+import { SOCKET_EVENTS } from '../constants/SocketEvents';
 import {
   END_OF_FILE_MESSAGE,
   MAXIMUM_MESSAGE_SIZE,
@@ -8,7 +8,7 @@ import {
   START_OF_FILE_MESSAGE
 } from '../constants/WebRTC';
 import DataStore from '../stores/DataStore';
-import {WebRTCConnectionStatus} from '../types/WebRTC';
+import { WebRTCConnectionStatus } from '../types/WebRTC';
 
 interface ICreateDataChannelParams {
   label: string;
@@ -23,9 +23,8 @@ class WebRTCController {
   private peerRole: string;
   private webRTCConnection: RTCPeerConnection;
   private dataChannelsMap: { [key: string]: RTCDataChannel } = {};
-  private filesProgress: { [key: string]: number } = {};
 
-  registerRoutes = (): void => {
+  constructor() {
     SocketService.registerEvent(SOCKET_EVENTS.PEER_JOINED, this.handlePeerJoinedEvent);
     SocketService.registerEvent(SOCKET_EVENTS.OFFER, this.handleOfferEvent);
     SocketService.registerEvent(SOCKET_EVENTS.ANSWER, this.handleAnswerEvent);
