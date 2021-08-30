@@ -1,4 +1,4 @@
-const socketURL = 'http://35.208.29.108';
+const socketURL = 'https://sendight.ml';
 
 const getSlugRoute = `${socketURL}/slug`;
 
