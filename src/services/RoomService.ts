@@ -50,15 +50,9 @@ class RoomService {
    * @returns roomSlug - A kind of human readable room id
    */
   getCurrentRoomSlug = (): string | null => {
-    const pathNameRegex = new RegExp(
-      /\/room\/(?<roomSlug>[a-zA-Z]+-[a-zA-Z]+)$/
-    );
-    const currentUrl = new URL(window.location.href);
+    const currentURL = window.location.href;
 
-    const { groups: { roomSlug = null } = {} } =
-      pathNameRegex.exec(currentUrl.pathname) || {};
-
-    return roomSlug;
+    return currentURL.split('room/')?.[1];
   }
 }
 
