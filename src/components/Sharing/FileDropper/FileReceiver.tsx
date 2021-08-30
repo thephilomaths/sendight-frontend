@@ -52,10 +52,6 @@ const FileItemWrapper = styled.div`
 `;
 
 const FileReceiver = () => {
-  const handleCancelDownload = (fileHash: string) => {
-    console.log(fileHash);
-  };
-
   const handleDownload = (fileHash: string): void => {
     const a = document.createElement('a');
     const blob = new Blob(DataStore.fileHashToDataMap[fileHash]);

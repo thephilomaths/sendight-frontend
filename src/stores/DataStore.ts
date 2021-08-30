@@ -62,6 +62,7 @@ class DataStore {
   @action
   setWebRTCConnectionStatus = (webRTCConnectionStatus: WebRTCConnectionStatus) => {
     this.webRTCConnectionStatus = webRTCConnectionStatus;
+    // eslint-disable-next-line no-console
     console.log('Connection status: ', webRTCConnectionStatus);
   }
 
