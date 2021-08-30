@@ -11,17 +11,36 @@ const Wrapper = styled.div`
 
 const FilesWrapper = styled.div`
   box-sizing: border-box;
-  height: 100%;
-  min-height: 380px;
+  height: 380px;
   width: 100%;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   align-items: flex-start;
   padding: 24px;
-  border-radius: 8px;
-  border: 2px solid rgba(74, 74, 79, 1);
   margin-bottom: 24px;
+  background-color: #000000;
+  
+  overflow-y: auto;
+
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 3px;
+  }
+  ::-webkit-scrollbar-track {
+    background-color: #646464;
+  }
+  ::-webkit-scrollbar-track-piece {
+    background-color: #1e1e1e;
+  }
+  ::-webkit-scrollbar-thumb {
+    height: 50px;
+    background-color: #666;
+    border-radius: 3px;
+  }
+  ::-webkit-resizer {
+    background-color: #666;
+  }
 `;
 
 const FileItemWrapper = styled.div`
