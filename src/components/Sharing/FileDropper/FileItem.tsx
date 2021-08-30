@@ -103,12 +103,12 @@ const FileItem = (props: IProps): React.ReactElement => {
       <FileDetails>
         <Text content={file.name} maxWidth="275px" fontWeight="bolder" title={file.name} truncate />
         <ProgressContainer>
-          {progress && (
+          {progress ? (
             <>
               <Progress value={progress} max={file.size} />
               <Text content={FileDropperUtil.formatBytes(progress)} fontSize="12px" /> &nbsp;/&nbsp;
             </>
-          )}
+          ): ''}
           <Text content={FileDropperUtil.formatBytes(file.size)} fontSize="12px" fontWeight="700" />
         </ProgressContainer>
       </FileDetails>

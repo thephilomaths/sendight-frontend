@@ -13,17 +13,18 @@ const Wrapper = styled.div<ButtonProps>`
   padding: 16px 24px;
   border-radius: 8px;
   font-weight: 700;
+  cursor: pointer;
   width: ${({ width }) => {
     return width;
   }};
   text-align: ${({ textAlign }) => {
     return textAlign;
   }};
-  opacity: ${({isDisabled}) => {
-    return isDisabled ? 0.5 : 1;
-  }};
-  cursor: ${({isDisabled}) => {
-    return isDisabled ? 'not-allowed' : 'pointer';
+  ${({isDisabled}) => {
+    return isDisabled && `
+      opacity: 0.6;
+      pointer-events: none;
+    `;
   }};
 
   &:hover {
@@ -41,7 +42,7 @@ const Button = (props: IProps): React.ReactElement => {
   const { children, width, textAlign, isDisabled, onClick } = props;
 
   return (
-    <Wrapper width={width} textAlign={textAlign} onClick={isDisabled ? undefined : onClick}>
+    <Wrapper width={width} textAlign={textAlign} isDisabled={isDisabled} onClick={isDisabled ? undefined : onClick}>
       {children}
     </Wrapper>
   );

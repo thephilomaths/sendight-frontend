@@ -2,6 +2,7 @@ import SocketService from '../services/SocketService';
 import { webRTCConnectionInfo } from '../config';
 import { SOCKET_EVENTS } from '../constants/SocketEvents';
 import {
+  CANCEL_MESSAGE,
   END_OF_FILE_MESSAGE,
   MAXIMUM_MESSAGE_SIZE,
   META_DATA_CHANNEL_LABEL,
@@ -26,6 +27,7 @@ class WebRTCController {
   private dataChannelsMap: { [key: string]: RTCDataChannel } = {};
   // eslint-disable-next-line @typescript-eslint/ban-types
   private sendFileCallbackQueue: Function[] = [];
+  private cancelledFilesMap: { [fileHash: string]: boolean } = {};
 
   constructor() {
     SocketService.registerEvent(SOCKET_EVENTS.PEER_JOINED, this.handlePeerJoinedEvent);
@@ -102,6 +104,9 @@ class WebRTCController {
   sendChunk = async (file: File, offset: number, dataChannel: RTCDataChannel): Promise<number> => {
     const chunk = file.slice(offset, offset + MAXIMUM_MESSAGE_SIZE);
     const buffer = await chunk.arrayBuffer();
+    if (dataChannel.readyState !== 'open') {
+      return offset;
+    }
     dataChannel.send(buffer);
 
     return offset + chunk.size;
@@ -129,6 +134,7 @@ class WebRTCController {
   handleDataChannelCloseWebRTCEvent = (): void => {
     const sendFileCallback = this.sendFileCallbackQueue.shift();
     if (!sendFileCallback) {
+      DataStore.setIsSending(false);
       return;
     }
 
@@ -137,37 +143,41 @@ class WebRTCController {
 
   sendFiles = (filesObject: { [key: string]: File }): void => {
     Object.keys(filesObject).forEach((fileHash) => {
-      const sendFileCallback = (): void => {
-        const label = `file-${fileHash}`;
-        const file = filesObject[fileHash];
+      if (!DataStore.filesSendProgress[fileHash]) {
+        const sendFileCallback = (): void => {
+          if(this.cancelledFilesMap[fileHash]) {
+            this.handleDataChannelCloseWebRTCEvent();
+            return;
+          }
+          const label = `file-${fileHash}`;
+          const file = filesObject[fileHash];
 
-        if (!DataStore.filesSendProgress[fileHash]) {
-          DataStore.setFileSendProgress(fileHash, 0);
+            DataStore.setFileSendProgress(fileHash, 0);
 
-          const dataChannel = this.createDataChannel({
-            label,
-            onOpenHandler: (event) => {
-              return this.handleFileDataChannelOpenWebRTCEvent(event, dataChannel);
-            },
-            onBufferedAmountLowHandler: (event) => {
-              return this.handleBufferedAmountLowWebRTCEvent(event, dataChannel, fileHash, file);
-            },
-            onCloseHandler: () => {
-              return this.handleDataChannelCloseWebRTCEvent();
-            }
-          });
+            const dataChannel = this.createDataChannel({
+              label,
+              onOpenHandler: (event) => {
+                return this.handleFileDataChannelOpenWebRTCEvent(event, dataChannel);
+              },
+              onBufferedAmountLowHandler: (event) => {
+                return this.handleBufferedAmountLowWebRTCEvent(event, dataChannel, fileHash, file);
+              },
+              onCloseHandler: () => {
+                return this.handleDataChannelCloseWebRTCEvent();
+              }
+            });
 
-          // dataChannel.bufferedAmountLowThreshold = BUFFERED_AMOUNT_LOW_THRESHOLD;
-          dataChannel.binaryType = 'arraybuffer';
-        }
+            // dataChannel.bufferedAmountLowThreshold = BUFFERED_AMOUNT_LOW_THRESHOLD;
+            dataChannel.binaryType = 'arraybuffer';
+        };
 
-      };
-
-      this.sendFileCallbackQueue.push(sendFileCallback);
+        this.sendFileCallbackQueue.push(sendFileCallback);
+      }
     });
 
     const sendFileCallback = this.sendFileCallbackQueue.shift();
     if (sendFileCallback) {
+      DataStore.setIsSending(true);
       sendFileCallback();
     }
   };
@@ -177,23 +187,42 @@ class WebRTCController {
     const { label } = dataChannel;
     const fileHash = label.split('-')?.[1];
 
-    if (data !== END_OF_FILE_MESSAGE && data !== START_OF_FILE_MESSAGE) {
+    if (data === END_OF_FILE_MESSAGE) {
+      dataChannel.close();
+    } else if (data === START_OF_FILE_MESSAGE) {
+      DataStore.clearFileData(fileHash);
+      DataStore.setFileReceiveProgress(fileHash, 0);
+    } else if (data === CANCEL_MESSAGE) {
+      this.cancelReceiverSendOperation(fileHash);
+    } else {
       DataStore.addFileData(fileHash, data);
 
       const fileReceiveSize =
         DataStore.fileHashToDataMap[fileHash].length * DataStore.fileHashToDataMap[fileHash]?.[0].byteLength;
 
       DataStore.setFileReceiveProgress(fileHash, fileReceiveSize);
-    } else if (data === END_OF_FILE_MESSAGE) {
-      dataChannel.close();
-    } else if (data === START_OF_FILE_MESSAGE) {
-      DataStore.clearFileData(fileHash);
-      DataStore.setFileReceiveProgress(fileHash, 0);
     }
   }
 
   handleMetaDataChannel = (event: MessageEvent) => {
     DataStore.setFileHashToMetadataMap(JSON.parse(event.data));
+  }
+
+  cancelReceiverSendOperation = (fileHash: string): void => {
+    DataStore.setFileReceiveProgress(fileHash, 0);
+    DataStore.clearFileData(fileHash);
+  }
+
+  cancelSenderSendOperation = (fileHash: string): void => {
+    const dataChannelLabel = `file-${fileHash}`;
+    const dataChannel = this.dataChannelsMap[dataChannelLabel];
+    DataStore.setFileSendProgress(fileHash, 0);
+
+    this.cancelledFilesMap[fileHash] = true;
+    if (dataChannel && dataChannel.readyState === 'open') {
+      dataChannel.send(CANCEL_MESSAGE);
+      dataChannel.close();
+    }
   }
 
   // WebRTC events start
