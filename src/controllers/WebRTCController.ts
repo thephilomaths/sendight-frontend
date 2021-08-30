@@ -57,7 +57,7 @@ class WebRTCController {
     onMessageHandler,
     onBufferedAmountLowHandler
   }: ICreateDataChannelParams): RTCDataChannel => {
-    const dataChannel = this.webRTCConnection.createDataChannel(label)
+    const dataChannel = this.webRTCConnection.createDataChannel(label);
 
     if (onOpenHandler) {
       dataChannel.onopen = onOpenHandler;
@@ -127,8 +127,12 @@ class WebRTCController {
 
         const dataChannel = this.createDataChannel({
           label,
-          onOpenHandler: (event) => { return this.handleFileDataChannelOpenWebRTCEvent(event, dataChannel) },
-          onBufferedAmountLowHandler: (event) => { return this.handleBufferedAmountLowWebRTCEvent(event, dataChannel, fileHash, file) },
+          onOpenHandler: (event) => {
+            return this.handleFileDataChannelOpenWebRTCEvent(event, dataChannel);
+          },
+          onBufferedAmountLowHandler: (event) => {
+            return this.handleBufferedAmountLowWebRTCEvent(event, dataChannel, fileHash, file);
+          },
         });
 
         // dataChannel.bufferedAmountLowThreshold = BUFFERED_AMOUNT_LOW_THRESHOLD;
@@ -144,6 +148,11 @@ class WebRTCController {
 
     if (data !== END_OF_FILE_MESSAGE && data !== START_OF_FILE_MESSAGE) {
       DataStore.setFileData(fileHash, data);
+
+      const fileReceiveSize =
+        DataStore.fileHashToDataMap[fileHash].length * DataStore.fileHashToDataMap[fileHash]?.[0].byteLength;
+
+      DataStore.setFileReceiveProgress(fileHash, fileReceiveSize);
     } else if (data === END_OF_FILE_MESSAGE) {
       const a = document.createElement('a');
       const blob = new Blob(DataStore.fileHashToDataMap[fileHash]);
@@ -199,7 +208,7 @@ class WebRTCController {
     if (label === META_DATA_CHANNEL_LABEL) {
       channel.onmessage = this.handleMetaDataChannel;
     } else {
-      channel.onmessage = (e) => { return this.handleFileReceiveWebRTCEvent(e, channel) };
+      channel.onmessage = (e) => { return this.handleFileReceiveWebRTCEvent(e, channel); };
     }
 
     this.dataChannelsMap[label] = channel;

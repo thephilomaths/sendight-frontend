@@ -46,7 +46,7 @@ const ProgressContainer = styled.div`
   display: flex;
   align-items: center;
   margin-top: 4px;
-`
+`;
 
 const Progress = styled.progress`
   height: 4px;
@@ -56,10 +56,10 @@ const Progress = styled.progress`
   margin-right: 8px;
 
   &::-webkit-progress-value {
-    background: #e91e63;;
+    background: #e91e63;
     border-radius: 16px;
   }
-  
+
   &::-webkit-progress-value {
     background: #e91e63;
     border-radius: 16px;
@@ -69,12 +69,12 @@ const Progress = styled.progress`
     background: #ffe3ec;
     border-radius: 16px;
   }
-  
+
   &::-webkit-progress-bar {
     background: #ffe3ec;
     border-radius: 16px;
   }
-`
+`;
 
 const FileIconStyles = {
   color: '#fff',
@@ -87,13 +87,12 @@ const RemoveIconStyles = {
 interface IProps {
   file: File;
   fileHash: string;
+  progress?: number;
   onRemove: (fileToRemoveHash: string) => void;
 }
 
-const FileItem = observer((props: IProps): React.ReactElement => {
-  const { file, fileHash, onRemove } = props;
-  const sendProgress = DataStore.filesSendProgress[fileHash];
-  const receiveProgress = DataStore.filesReceiveProgress[fileHash]
+const FileItem = (props: IProps): React.ReactElement => {
+  const { file, fileHash, progress, onRemove } = props;
 
   return (
     <Wrapper>
@@ -103,15 +102,13 @@ const FileItem = observer((props: IProps): React.ReactElement => {
       <FileDetails>
         <Text content={file.name} maxWidth="275px" fontWeight="bolder" title={file.name} truncate />
         <ProgressContainer>
-          {
-            (sendProgress || receiveProgress) && (
-              <>
-                <Progress value={sendProgress} max={file.size}/>
-                <Text content={FileDropperUtil.formatBytes(sendProgress)} fontSize='12px' /> &nbsp;/&nbsp;
-              </>
-            )
-          }
-          <Text content={FileDropperUtil.formatBytes(file.size)} fontSize="12px" fontWeight='700' />
+          {progress && (
+            <>
+              <Progress value={progress} max={file.size} />
+              <Text content={FileDropperUtil.formatBytes(progress)} fontSize="12px" /> &nbsp;/&nbsp;
+            </>
+          )}
+          <Text content={FileDropperUtil.formatBytes(file.size)} fontSize="12px" fontWeight="700" />
         </ProgressContainer>
       </FileDetails>
       <RemoveButton
@@ -124,6 +121,10 @@ const FileItem = observer((props: IProps): React.ReactElement => {
       </RemoveButton>
     </Wrapper>
   );
-});
+};
 
-export { FileItem };
+FileItem.defaultProps = {
+  progress: null,
+};
+
+export default FileItem;

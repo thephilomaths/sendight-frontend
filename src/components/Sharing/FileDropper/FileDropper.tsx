@@ -1,12 +1,14 @@
 import React, { useRef, useState } from 'react';
 import styled from 'styled-components';
 import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
+import { observer } from 'mobx-react-lite';
 
 import { Button } from '../../Button';
 import { Text } from '../../Text';
 import { FileDropperUtil } from '../../../utils/FileDropper';
-import { FileItem } from './FileItem';
+import FileItem from './FileItem';
 import WebRTCController from '../../../controllers/WebRTCController';
+import DataStore from '../../../stores/DataStore';
 
 const Wrapper = styled.div<{ isDragging: boolean; containItems: boolean }>`
   box-sizing: border-box;
@@ -251,10 +253,11 @@ const FileDropper = (): React.ReactElement => {
           <DroppedFilesWrapper>
             {Object.keys(droppedFiles).map((fileHash) => {
               const file = droppedFiles[fileHash];
+              const sendProgress = DataStore.filesSendProgress[fileHash];
 
               return (
-                <FileItemWrapper key={file.lastModified}>
-                  <FileItem file={file} fileHash={fileHash} onRemove={handleFileRemove} />
+                <FileItemWrapper key={fileHash}>
+                  <FileItem file={file} progress={sendProgress} fileHash={fileHash} onRemove={handleFileRemove} />
                 </FileItemWrapper>
               );
             })}
@@ -300,4 +303,4 @@ const FileDropper = (): React.ReactElement => {
   );
 };
 
-export { FileDropper };
+export default observer(FileDropper);

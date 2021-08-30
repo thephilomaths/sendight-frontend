@@ -13,6 +13,7 @@ import { ErrorState } from '../../components/Sharing/ErrorState';
 import { Button } from '../../components/Button';
 import DataStore from '../../stores/DataStore';
 import { WebRTCConnectionStatus } from '../../types/WebRTC';
+import { FileReceiver } from '../../components/Sharing/FileDropper';
 
 const Wrapper = styled.div`
   display: flex;
@@ -185,6 +186,10 @@ const Sharing = (): React.ReactElement => {
           </CreateNewRoomButtonWrapper>
         </CreateNewRoomWrapper>
       );
+    }
+
+    if (Object.keys(DataStore.filesReceiveProgress).length) {
+      return <FileReceiver />;
     }
 
     return <FileDropper />;

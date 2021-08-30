@@ -1,5 +1,5 @@
-import { action, observable, makeAutoObservable } from 'mobx';
-import {WebRTCConnectionStatus} from '../types/WebRTC';
+import { action, makeAutoObservable } from 'mobx';
+import { WebRTCConnectionStatus } from '../types/WebRTC';
 
 interface IFileHashToMetadataMap {
   [fileHash: string]: File
@@ -17,9 +17,9 @@ class DataStore {
   peerConnectionStatus = false;
   webRTCConnectionStatus: WebRTCConnectionStatus = WebRTCConnectionStatus.DISCONNECTED;
   fileHashToMetadataMap: IFileHashToMetadataMap = {};
+  fileHashToDataMap: IFileHashToDataMap = {}
   filesSendProgress: IFilesProgress = {};
   filesReceiveProgress: IFilesProgress = {};
-  fileHashToDataMap: IFileHashToDataMap = {}
 
   constructor() {
     makeAutoObservable(this);
@@ -57,6 +57,14 @@ class DataStore {
   setWebRTCConnectionStatus = (webRTCConnectionStatus: WebRTCConnectionStatus) => {
     this.webRTCConnectionStatus = webRTCConnectionStatus;
     console.log('Connection status: ', webRTCConnectionStatus);
+  }
+
+  @action
+  clearFilesData = () => {
+    this.fileHashToMetadataMap = {};
+    this.fileHashToDataMap = {};
+    this.filesReceiveProgress = {};
+    this.filesSendProgress = {};
   }
 }
 
