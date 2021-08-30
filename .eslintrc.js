@@ -42,7 +42,8 @@ module.exports = {
     'arrow-body-style': ['error', 'always'],
     'lines-between-class-members': 'off',
     'no-restricted-syntax': 'off',
-    'no-await-in-loop': 'off'
+    'no-await-in-loop': 'off',
+    'semi': ['warn', 'always']
   },
   'settings': {
     'import/resolver': {

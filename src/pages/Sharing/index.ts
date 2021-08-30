@@ -1,3 +1,3 @@
-import Sharing from './Sharing'
+import Sharing from './Sharing';
 
 export { Sharing };

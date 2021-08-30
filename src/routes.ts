@@ -1,7 +1,5 @@
-const baseURL = 'http://localhost:8000';
-
 const socketURL = 'http://localhost:8000';
 
-const getSlugRoute = `${baseURL}/slug`;
+const getSlugRoute = `${socketURL}/slug`;
 
-export { baseURL, getSlugRoute, socketURL };
+export { getSlugRoute, socketURL };
