@@ -20,6 +20,7 @@ class DataStore {
   fileHashToDataMap: IFileHashToDataMap = {}
   filesSendProgress: IFilesProgress = {};
   filesReceiveProgress: IFilesProgress = {};
+  isSending = false;
 
   constructor() {
     makeAutoObservable(this);
@@ -70,6 +71,11 @@ class DataStore {
     this.fileHashToDataMap = {};
     this.filesReceiveProgress = {};
     this.filesSendProgress = {};
+  }
+
+  @action
+  setIsSending = (isSending: boolean) => {
+    this.isSending = isSending;
   }
 }
 

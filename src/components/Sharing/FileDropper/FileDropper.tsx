@@ -1,14 +1,15 @@
-import React, { useRef, useState } from 'react';
+import React, {useRef, useState} from 'react';
 import styled from 'styled-components';
 import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
-import { observer } from 'mobx-react-lite';
+import {observer} from 'mobx-react-lite';
 
-import { Button } from '../../Button';
-import { Text } from '../../Text';
-import { FileDropperUtil } from '../../../utils/FileDropper';
+import {Button} from '../../Button';
+import {Text} from '../../Text';
+import {FileDropperUtil} from '../../../utils/FileDropper';
 import FileItem from './FileItem';
 import WebRTCController from '../../../controllers/WebRTCController';
 import DataStore from '../../../stores/DataStore';
+import {WebRTCConnectionStatus} from '../../../types/WebRTC';
 
 const Wrapper = styled.div<{ isDragging: boolean; containItems: boolean }>`
   box-sizing: border-box;
@@ -227,11 +228,12 @@ const FileDropper = (): React.ReactElement => {
   /**
    * Function to handle file remove from file dropper area
    *
-   * @param fileToRemove
+   * @param fileToRemoveHash
    */
   const handleFileRemove = (fileToRemoveHash: string) => {
     const { [fileToRemoveHash]: _fileToRemove, ...otherFiles } = droppedFiles;
 
+    WebRTCController.cancelSenderSendOperation(fileToRemoveHash);
     setDroppedFiles(otherFiles);
   };
 
@@ -280,6 +282,11 @@ const FileDropper = (): React.ReactElement => {
               WebRTCController.sendMetadata(droppedFiles);
               WebRTCController.sendFiles(droppedFiles);
             }}
+            isDisabled={
+              !DataStore.peerConnectionStatus ||
+              DataStore.webRTCConnectionStatus !== WebRTCConnectionStatus.CONNECTED ||
+              DataStore.isSending
+            }
           >
             Send
           </Button>
