@@ -29,6 +29,7 @@ class WebRTCController {
     SocketService.registerEvent(SOCKET_EVENTS.OFFER, this.handleOfferEvent);
     SocketService.registerEvent(SOCKET_EVENTS.ANSWER, this.handleAnswerEvent);
     SocketService.registerEvent(SOCKET_EVENTS.ICE_CANDIDATE, this.handleIceCandidateEvent);
+    SocketService.registerEvent(SOCKET_EVENTS.PEER_LEFT, this.handlePeerLeftEvent);
   }
 
   createWebRTCConnection = (): void => {
@@ -147,22 +148,17 @@ class WebRTCController {
     const fileHash = label.split('-')?.[1];
 
     if (data !== END_OF_FILE_MESSAGE && data !== START_OF_FILE_MESSAGE) {
-      DataStore.setFileData(fileHash, data);
+      DataStore.addFileData(fileHash, data);
 
       const fileReceiveSize =
         DataStore.fileHashToDataMap[fileHash].length * DataStore.fileHashToDataMap[fileHash]?.[0].byteLength;
 
       DataStore.setFileReceiveProgress(fileHash, fileReceiveSize);
     } else if (data === END_OF_FILE_MESSAGE) {
-      const a = document.createElement('a');
-      const blob = new Blob(DataStore.fileHashToDataMap[fileHash]);
-
-      a.href = window.URL.createObjectURL(blob);
-      a.download = DataStore.fileHashToMetadataMap[fileHash].name;
-      a.click();
-      a.remove();
-
       dataChannel.close();
+    } else if (data === START_OF_FILE_MESSAGE) {
+      DataStore.clearFileData(fileHash);
+      DataStore.setFileReceiveProgress(fileHash, 0);
     }
   }
 
@@ -237,6 +233,12 @@ class WebRTCController {
     }
 
     DataStore.setPeerConnectionStatus(true);
+  }
+
+  handlePeerLeftEvent = (): void => {
+    this.peerId = '';
+    this.peerRole = '';
+    DataStore.setPeerConnectionStatus(false);
   }
 
   handleOfferEvent = async (offer: RTCSessionDescriptionInit): Promise<void> => {

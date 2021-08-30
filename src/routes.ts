@@ -1,4 +1,4 @@
-const socketURL = 'http://localhost:8000';
+const socketURL = 'http://35.208.29.108';
 
 const getSlugRoute = `${socketURL}/slug`;
 

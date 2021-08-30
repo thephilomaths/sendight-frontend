@@ -41,11 +41,16 @@ class DataStore {
   }
 
   @action
-  setFileData = (fileHash: string, buffer: ArrayBuffer) => {
+  addFileData = (fileHash: string, buffer: ArrayBuffer) => {
     if (!this.fileHashToDataMap[fileHash]) {
       this.fileHashToDataMap[fileHash] = [];
     }
     this.fileHashToDataMap[fileHash].push(buffer);
+  }
+
+  @action
+  clearFileData = (fileHash: string) => {
+    this.fileHashToDataMap[fileHash] = [];
   }
 
   @action

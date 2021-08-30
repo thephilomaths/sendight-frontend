@@ -4,4 +4,5 @@ export const SOCKET_EVENTS = {
   OFFER: 'offer',
   ANSWER: 'answer',
   ICE_CANDIDATE: 'ice-candidate',
+  PEER_LEFT: 'peer-left',
 };
