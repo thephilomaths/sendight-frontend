@@ -38,6 +38,16 @@ const FileReceiver = () => {
     console.log(fileHash);
   };
 
+  const handleDownload = (fileHash: string): void => {
+    const a = document.createElement('a');
+    const blob = new Blob(DataStore.fileHashToDataMap[fileHash]);
+
+    a.href = window.URL.createObjectURL(blob);
+    a.download = DataStore.fileHashToMetadataMap[fileHash].name;
+    a.click();
+    a.remove();
+  };
+
   const handleClearDownloads = () => {
     DataStore.clearFilesData();
   };
@@ -53,8 +63,9 @@ const FileReceiver = () => {
             file={file}
             progress={receiveProgress}
             fileHash={fileHash}
-            onRemove={() => {
-              return handleCancelDownload(fileHash);
+            enableDownload={receiveProgress >= file.size}
+            onDownload={() => {
+              return handleDownload(fileHash);
             }}
           />
         </FileItemWrapper>

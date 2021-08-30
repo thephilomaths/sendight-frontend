@@ -2,11 +2,10 @@ import React from 'react';
 import styled from 'styled-components';
 import FileIcon from '@material-ui/icons/Description';
 import RemoveIcon from '@material-ui/icons/HighlightOff';
-import { observer } from 'mobx-react-lite';
+import GetAppRoundedIcon from '@material-ui/icons/GetAppRounded';
 
 import { Text } from '../../Text';
 import { FileDropperUtil } from '../../../utils/FileDropper';
-import DataStore from '../../../stores/DataStore';
 
 const Wrapper = styled.div`
   display: flex;
@@ -28,7 +27,7 @@ const FileDetails = styled.div`
   flex: 1;
 `;
 
-const RemoveButton = styled.button`
+const ActionButton = styled.button`
   border: none;
   background-color: transparent;
   outline: none;
@@ -80,7 +79,7 @@ const FileIconStyles = {
   color: '#fff',
 };
 
-const RemoveIconStyles = {
+const IconStyles = {
   color: '#fff',
 };
 
@@ -88,11 +87,13 @@ interface IProps {
   file: File;
   fileHash: string;
   progress?: number;
-  onRemove: (fileToRemoveHash: string) => void;
+  enableDownload?: boolean;
+  onRemove?: (fileToRemoveHash: string) => void;
+  onDownload?: (fileToDownloadHash: string) => void;
 }
 
 const FileItem = (props: IProps): React.ReactElement => {
-  const { file, fileHash, progress, onRemove } = props;
+  const { file, fileHash, progress, enableDownload, onRemove, onDownload } = props;
 
   return (
     <Wrapper>
@@ -111,20 +112,40 @@ const FileItem = (props: IProps): React.ReactElement => {
           <Text content={FileDropperUtil.formatBytes(file.size)} fontSize="12px" fontWeight="700" />
         </ProgressContainer>
       </FileDetails>
-      <RemoveButton
-        type="button"
-        onClick={() => {
-          return onRemove(fileHash);
-        }}
-      >
-        <RemoveIcon style={RemoveIconStyles} />
-      </RemoveButton>
+      {
+        onRemove && (
+          <ActionButton
+            type="button"
+            onClick={() => {
+              return onRemove(fileHash);
+            }}
+          >
+            <RemoveIcon style={IconStyles} />
+          </ActionButton>
+        )
+      }
+
+      {
+        onDownload && enableDownload && (
+          <ActionButton
+            type="button"
+            onClick={() => {
+              return onDownload(fileHash);
+            }}
+          >
+            <GetAppRoundedIcon style={IconStyles} />
+          </ActionButton>
+        )
+      }
     </Wrapper>
   );
 };
 
 FileItem.defaultProps = {
   progress: null,
+  onRemove: null,
+  onDownload: null,
+  enableDownload: false,
 };
 
 export default FileItem;
