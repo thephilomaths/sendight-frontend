@@ -1,18 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 
+import { People, Person, PortableWifiOff, WifiTethering } from '@material-ui/icons';
+import { observer } from 'mobx-react-lite';
+import RoomService from '../../services/RoomService';
+
 import { FileDropper, LoadingState } from '../../components/Sharing';
 import { Text } from '../../components/Text';
 import SendIllustration from '../../assets/illustrations/send.svg';
-import {
-  LOADING_STATE_MESSAGES,
-  LOADING_STATES,
-  ERROR_STATE_MESSAGES,
-  ERROR_STATES,
-} from '../../constants/Sharing';
+import { LOADING_STATE_MESSAGES, LOADING_STATES, ERROR_STATE_MESSAGES, ERROR_STATES } from '../../constants/Sharing';
 import { ErrorState } from '../../components/Sharing/ErrorState';
 import { Button } from '../../components/Button';
-import { RoomService } from '../../services/RoomService';
+import DataStore from '../../stores/DataStore';
+import { WebRTCConnectionStatus } from '../../types/WebRTC';
+import { FileReceiver } from '../../components/Sharing/FileDropper';
 
 const Wrapper = styled.div`
   display: flex;
@@ -30,7 +31,7 @@ const Container = styled.div`
   padding: 32px;
   border: 1px solid rgba(42, 42, 46, 1);
   background-color: rgba(12, 12, 13, 1);
-  border-radius: 10px;
+  border-radius: 8px;
 `;
 
 const ActionAndContentWrapper = styled.div`
@@ -83,8 +84,35 @@ const CreateNewRoomButtonWrapper = styled.div`
   margin-top: 24px;
 `;
 
+const StatusesWrapper = styled.div`
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 12px;
+  border: 1px solid rgba(42, 42, 46, 1);
+  border-radius: 8px;
+  margin-bottom: 8px;
+`;
+
+const WebRTCStatusWrapper = styled.div`
+  display: flex;
+  align-items: center;
+
+  span {
+    margin-right: 12px;
+  }
+`;
+
+const PeerStatusWrapper = styled.div`
+  display: flex;
+  align-items: center;
+
+  span {
+    margin-right: 12px;
+  }
+`;
+
 const Sharing = (): React.ReactElement => {
-  const [isRoomJoinedOrCreated, setIsRoomJoinedOrCreated] = useState(false);
+  const [isRoomJoinedOrCreated, setIsRoomJoined] = useState(false);
   const [currentLoadingState, setLoadingState] = useState('');
   const [currentErrorState, setErrorState] = useState('');
 
@@ -96,7 +124,9 @@ const Sharing = (): React.ReactElement => {
    * @param roomSlug - Room to connect
    */
   const handleRoomConnect = (roomSlug: string) => {
-    console.log(roomSlug);
+    RoomService.joinRoom(roomSlug);
+    setLoadingState('');
+    setIsRoomJoined(true);
   };
 
   /**
@@ -108,20 +138,17 @@ const Sharing = (): React.ReactElement => {
     setLoadingState(LOADING_STATES.create);
 
     try {
-      const slug = await RoomService.createRoom();
+      const roomSlug = await RoomService.createRoom();
 
-      window.history.pushState({}, 'room-page', `/room/${slug}`);
+      window.history.pushState({}, 'room-page', `/room/${roomSlug}`);
 
+      RoomService.joinRoom(roomSlug);
       setErrorState('');
-      setIsRoomJoinedOrCreated(true);
+      setIsRoomJoined(true);
     } catch (error) {
       setErrorState(ERROR_STATES.create);
       // eslint-disable-next-line no-console
-      console.log(
-        'Sharing~handleCreateRoom: Error occurred while creating new room',
-        '\nReason: ',
-        error
-      );
+      console.log('Sharing~handleCreateRoom: Error occurred while creating new room', '\nReason: ', error);
     } finally {
       setLoadingState('');
     }
@@ -134,9 +161,7 @@ const Sharing = (): React.ReactElement => {
    */
   const getActionWrapperContent = () => {
     if (currentLoadingState) {
-      return (
-        <LoadingState content={LOADING_STATE_MESSAGES[currentLoadingState]} />
-      );
+      return <LoadingState content={LOADING_STATE_MESSAGES[currentLoadingState]} />;
     }
 
     if (currentErrorState) {
@@ -153,10 +178,7 @@ const Sharing = (): React.ReactElement => {
     if (!isRoomJoinedOrCreated) {
       return (
         <CreateNewRoomWrapper>
-          <Text
-            fontSize="20px"
-            content="Create a room first to start sharing"
-          />
+          <Text fontSize="20px" content="Create a room first to start sharing" />
           <CreateNewRoomButtonWrapper>
             <Button onClick={handleCreateRoom} width="fit-content">
               Create new room
@@ -164,6 +186,10 @@ const Sharing = (): React.ReactElement => {
           </CreateNewRoomButtonWrapper>
         </CreateNewRoomWrapper>
       );
+    }
+
+    if (Object.keys(DataStore.filesReceiveProgress).length) {
+      return <FileReceiver />;
     }
 
     return <FileDropper />;
@@ -187,12 +213,26 @@ const Sharing = (): React.ReactElement => {
         <ActionAndContentWrapper>
           <ActionWrapper>{getActionWrapperContent()}</ActionWrapper>
           <Content>
+            <StatusesWrapper>
+              <WebRTCStatusWrapper>
+                <Text content="WebRTC Connection" fontSize="12px" fontWeight="800" />
+                {DataStore.webRTCConnectionStatus === WebRTCConnectionStatus.CONNECTED ? (
+                  <WifiTethering style={{ color: '#81c784' }} />
+                ) : (
+                  <PortableWifiOff style={{ color: '#e57373' }} />
+                )}
+              </WebRTCStatusWrapper>
+              <PeerStatusWrapper>
+                <Text content="Peer Connection" fontSize="12px" fontWeight="800" />
+                {DataStore.peerConnectionStatus ? (
+                  <People style={{ color: '#81c784' }} />
+                ) : (
+                  <Person style={{ color: '#e57373' }} />
+                )}
+              </PeerStatusWrapper>
+            </StatusesWrapper>
             <Heading>
-              <Text
-                content="Simple, P2P file sharing"
-                fontSize="32px"
-                fontWeight="800"
-              />
+              <Text content="Simple P2P file sharing" fontSize="32px" fontWeight="800" />
             </Heading>
             <Text
               content="Sendight lets you share files in peer-to-peer way via webRTC. So you can keep what you share private and make sure your stuff doesn’t stay online forever."
@@ -206,4 +246,4 @@ const Sharing = (): React.ReactElement => {
   );
 };
 
-export { Sharing };
+export default observer(Sharing);
