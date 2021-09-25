@@ -1,5 +1,4 @@
-const baseRoute = 'http://localhost:8000';
+const socketURL = 'https://sendight.ml';
+const getSlugRoute = `${socketURL}/slug`;
 
-const getSlugRoute = `${baseRoute}/slug`;
-
-export { baseRoute, getSlugRoute };
+export { getSlugRoute, socketURL };

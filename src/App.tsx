@@ -1,5 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
+import adapter from 'webrtc-adapter';
 
 import { Sharing } from './pages/Sharing';
 import { Navbar } from './components/Navbar';

@@ -23,7 +23,9 @@ module.exports = {
   ],
   rules: {
     'no-use-before-define': 'off',
+    '@typescript-eslint/no-explicit-any': 'off',
     '@typescript-eslint/no-use-before-define': ['error'],
+    '@typescript-eslint/no-unused-vars': 'off',
     'import/extensions': [
       'error',
       'ignorePackages',
@@ -38,7 +40,11 @@ module.exports = {
     'quotes': ['error', 'single'],
     'import/prefer-default-export': 'off',
     'arrow-parens': ['error', 'always'],
-    'arrow-body-style': ['error', 'always']
+    'arrow-body-style': ['error', 'always'],
+    'lines-between-class-members': 'off',
+    'no-restricted-syntax': 'off',
+    'no-await-in-loop': 'off',
+    'semi': ['warn', 'always']
   },
   'settings': {
     'import/resolver': {
