@@ -59,13 +59,8 @@ const Progress = styled.progress`
     border-radius: 16px;
   }
 
-  &::-webkit-progress-value {
-    background: #e91e63;
-    border-radius: 16px;
-  }
-
   &::-moz-progress-bar {
-    background: #ffe3ec;
+    background: #e91e63;
     border-radius: 16px;
   }
 
@@ -108,35 +103,33 @@ const FileItem = (props: IProps): React.ReactElement => {
               <Progress value={progress} max={file.size} />
               <Text content={FileDropperUtil.formatBytes(progress)} fontSize="12px" /> &nbsp;/&nbsp;
             </>
-          ): ''}
+          ) : (
+            ''
+          )}
           <Text content={FileDropperUtil.formatBytes(file.size)} fontSize="12px" fontWeight="700" />
         </ProgressContainer>
       </FileDetails>
-      {
-        onRemove && (
-          <ActionButton
-            type="button"
-            onClick={() => {
-              return onRemove(fileHash);
-            }}
-          >
-            <RemoveIcon style={IconStyles} />
-          </ActionButton>
-        )
-      }
+      {onRemove && (
+        <ActionButton
+          type="button"
+          onClick={() => {
+            return onRemove(fileHash);
+          }}
+        >
+          <RemoveIcon style={IconStyles} />
+        </ActionButton>
+      )}
 
-      {
-        onDownload && enableDownload && (
-          <ActionButton
-            type="button"
-            onClick={() => {
-              return onDownload(fileHash);
-            }}
-          >
-            <GetAppRoundedIcon style={IconStyles} />
-          </ActionButton>
-        )
-      }
+      {onDownload && enableDownload && (
+        <ActionButton
+          type="button"
+          onClick={() => {
+            return onDownload(fileHash);
+          }}
+        >
+          <GetAppRoundedIcon style={IconStyles} />
+        </ActionButton>
+      )}
     </Wrapper>
   );
 };

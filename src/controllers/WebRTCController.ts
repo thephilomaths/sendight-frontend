@@ -145,30 +145,30 @@ class WebRTCController {
     Object.keys(filesObject).forEach((fileHash) => {
       if (!DataStore.filesSendProgress[fileHash]) {
         const sendFileCallback = (): void => {
-          if(this.cancelledFilesMap[fileHash]) {
+          if (this.cancelledFilesMap[fileHash]) {
             this.handleDataChannelCloseWebRTCEvent();
             return;
           }
           const label = `file-${fileHash}`;
           const file = filesObject[fileHash];
 
-            DataStore.setFileSendProgress(fileHash, 0);
+          DataStore.setFileSendProgress(fileHash, 0);
 
-            const dataChannel = this.createDataChannel({
-              label,
-              onOpenHandler: (event) => {
-                return this.handleFileDataChannelOpenWebRTCEvent(event, dataChannel);
-              },
-              onBufferedAmountLowHandler: (event) => {
-                return this.handleBufferedAmountLowWebRTCEvent(event, dataChannel, fileHash, file);
-              },
-              onCloseHandler: () => {
-                return this.handleDataChannelCloseWebRTCEvent();
-              }
-            });
+          const dataChannel = this.createDataChannel({
+            label,
+            onOpenHandler: (event) => {
+              return this.handleFileDataChannelOpenWebRTCEvent(event, dataChannel);
+            },
+            onBufferedAmountLowHandler: (event) => {
+              return this.handleBufferedAmountLowWebRTCEvent(event, dataChannel, fileHash, file);
+            },
+            onCloseHandler: () => {
+              return this.handleDataChannelCloseWebRTCEvent();
+            }
+          });
 
-            // dataChannel.bufferedAmountLowThreshold = BUFFERED_AMOUNT_LOW_THRESHOLD;
-            dataChannel.binaryType = 'arraybuffer';
+          // dataChannel.bufferedAmountLowThreshold = BUFFERED_AMOUNT_LOW_THRESHOLD;
+          dataChannel.binaryType = 'arraybuffer';
         };
 
         this.sendFileCallbackQueue.push(sendFileCallback);
@@ -182,7 +182,7 @@ class WebRTCController {
     }
   };
 
-  handleFileReceiveWebRTCEvent = (event: MessageEvent, dataChannel: RTCDataChannel): void => {
+  handleFileReceiveWebRTCEvent = async (event: MessageEvent, dataChannel: RTCDataChannel): Promise<void> => {
     const { data } = event;
     const { label } = dataChannel;
     const fileHash = label.split('-')?.[1];
@@ -195,7 +195,11 @@ class WebRTCController {
     } else if (data === CANCEL_MESSAGE) {
       this.cancelReceiverSendOperation(fileHash);
     } else {
-      DataStore.addFileData(fileHash, data);
+      if (data instanceof ArrayBuffer) {
+        DataStore.addFileData(fileHash, data);
+      } else {
+        DataStore.addFileData(fileHash, await data.arrayBuffer());
+      }
 
       const fileReceiveSize =
         DataStore.fileHashToDataMap[fileHash].length * DataStore.fileHashToDataMap[fileHash]?.[0].byteLength;

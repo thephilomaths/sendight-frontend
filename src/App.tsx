@@ -10,6 +10,10 @@ const Wrapper = styled.div`
 `;
 
 const App = (): React.ReactElement => {
+  // Do not remove this console statement, it includes webrtc-adapter in app
+  // eslint-disable-next-line no-console
+  console.log('Browser type', adapter.browserDetails.browser);
+
   return (
     <Wrapper>
       <Navbar />
