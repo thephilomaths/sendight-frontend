@@ -13,6 +13,7 @@ Sendight is a Peer-to-Peer file sharing platform built on top of webRTC.
 
 - Prerequisites:
   - Serve the backend and frontend. The backend can be found [here](https://github.com/thephilomaths/sendight-backend)
+  - Change `socketURL` in `src/routes.ts` to `http://localhost:8000`
 - Open the frontend in a browser window by going to `http://localhost:3000`
 - Click on create room
 - After creating the room, you will notice that the route in the address bar changes. The new route is the URL of the room
@@ -24,7 +25,7 @@ Sendight is a Peer-to-Peer file sharing platform built on top of webRTC.
 - After selecting the files click `Send`
 - Now, you should be able to see the statuses of files being sent and the receiver should be able to see the file being received
 - You can cancel the sending process any time
-- After the file is sent, the receiver will see a download button alongside each file
+- After the files are sent, the receiver will see a download button alongside each file
  
 ## Known Issues
 
@@ -45,3 +46,19 @@ Sendight is a Peer-to-Peer file sharing platform built on top of webRTC.
 - Socket.io
 - WebRTC
 - CSS
+
+## Contribute
+- To file any issue -> [here](https://github.com/thephilomaths/sendight-frontend/issues)
+- Feel free to contribute :D
+
+## Screenshots
+- Landing page
+    ![Sendight](./screenshots/Screenshot-1.png)
+- Room
+    ![Sendight](./screenshots/Screenshot-2.png)
+- Select files and connection establishment
+    ![Sendight](./screenshots/Screenshot-4.png)
+- Send files
+    ![Sendight](./screenshots/Screenshot-5.png)
+- Receive and download files
+    ![Sendight](./screenshots/Screenshot-6.png)
