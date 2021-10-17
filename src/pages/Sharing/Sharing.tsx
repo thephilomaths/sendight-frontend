@@ -44,6 +44,7 @@ const Container = styled.div`
 const ActionAndContentWrapper = styled.div`
   display: flex;
   flex-direction: column;
+  min-height: 500px;
 
   @media screen and (min-width: 960px) {
     flex-direction: row;
@@ -113,9 +114,11 @@ const CopyLink = styled.div`
 
 const Heading = styled.div``;
 
-const Illustration = styled.img`
+const Illustration = styled.img<{ enlarge: boolean }>`
   margin-top: 32px;
-  height: 170px;
+  height: ${({ enlarge }) => {
+    return enlarge ? '250px' : '170px';
+  }};
 `;
 
 const CreateNewRoomWrapper = styled.div`
@@ -274,42 +277,46 @@ const Sharing = (): React.ReactElement => {
         <ActionAndContentWrapper>
           <ActionWrapper>{getActionWrapperContent()}</ActionWrapper>
           <Content>
-            <RoomLinkContainer>
-              <Text content="Copy and share this link with your friend" fontSize="14px" fontWeight="600" />
-              <RoomLinkActionContainer>
-                <RoomLink value={window.location.href} readOnly />
-                <CopyLink onClick={handleCopyLink}>
-                  {isRoomLinkCopied ? (
-                    <CheckCircleOutlineRounded style={IconStyles} />
-                  ) : (
-                    <FileCopyOutlined style={IconStyles} />
-                  )}
-                </CopyLink>
-              </RoomLinkActionContainer>
-            </RoomLinkContainer>
+            {isRoomJoinedOrCreated && (
+              <>
+                <RoomLinkContainer>
+                  <Text content="Copy and share this link with your friend" fontSize="14px" fontWeight="600" />
+                  <RoomLinkActionContainer>
+                    <RoomLink value={window.location.href} readOnly />
+                    <CopyLink onClick={handleCopyLink}>
+                      {isRoomLinkCopied ? (
+                        <CheckCircleOutlineRounded style={IconStyles} />
+                      ) : (
+                        <FileCopyOutlined style={IconStyles} />
+                      )}
+                    </CopyLink>
+                  </RoomLinkActionContainer>
+                </RoomLinkContainer>
 
-            <StatusesWrapper>
-              <Text content="Connection Statuses" fontSize="14px" fontWeight="600" />
+                <StatusesWrapper>
+                  <Text content="Connection Statuses" fontSize="14px" fontWeight="600" />
 
-              <StatusesActionWrapper>
-                <WebRTCStatusWrapper>
-                  <Text content="WebRTC Connection" fontSize="12px" fontWeight="800" />
-                  {DataStore.webRTCConnectionStatus === WebRTCConnectionStatus.CONNECTED ? (
-                    <WifiTethering style={{ color: '#81c784' }} />
-                  ) : (
-                    <PortableWifiOff style={{ color: '#e57373' }} />
-                  )}
-                </WebRTCStatusWrapper>
-                <PeerStatusWrapper>
-                  <Text content="Peer Connection" fontSize="12px" fontWeight="800" />
-                  {DataStore.peerConnectionStatus ? (
-                    <People style={{ color: '#81c784' }} />
-                  ) : (
-                    <Person style={{ color: '#e57373' }} />
-                  )}
-                </PeerStatusWrapper>
-              </StatusesActionWrapper>
-            </StatusesWrapper>
+                  <StatusesActionWrapper>
+                    <WebRTCStatusWrapper>
+                      <Text content="WebRTC Connection" fontSize="12px" fontWeight="800" />
+                      {DataStore.webRTCConnectionStatus === WebRTCConnectionStatus.CONNECTED ? (
+                        <WifiTethering style={{ color: '#81c784' }} />
+                      ) : (
+                        <PortableWifiOff style={{ color: '#e57373' }} />
+                      )}
+                    </WebRTCStatusWrapper>
+                    <PeerStatusWrapper>
+                      <Text content="Peer Connection" fontSize="12px" fontWeight="800" />
+                      {DataStore.peerConnectionStatus ? (
+                        <People style={{ color: '#81c784' }} />
+                      ) : (
+                        <Person style={{ color: '#e57373' }} />
+                      )}
+                    </PeerStatusWrapper>
+                  </StatusesActionWrapper>
+                </StatusesWrapper>
+              </>
+            )}
 
             <Heading>
               <Text content="Simple P2P file sharing" fontSize="32px" fontWeight="800" />
@@ -318,7 +325,7 @@ const Sharing = (): React.ReactElement => {
               content="Sendight lets you share files in peer-to-peer way via webRTC. So you can keep what you share private and make sure your stuff doesn’t stay online forever."
               lineHeight="24px"
             />
-            <Illustration src={SendIllustration} />
+            <Illustration src={SendIllustration} enlarge={!isRoomJoinedOrCreated} />
           </Content>
         </ActionAndContentWrapper>
       </Container>
