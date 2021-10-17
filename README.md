@@ -73,3 +73,7 @@ Sendight is a Peer-to-Peer file sharing platform built on top of webRTC.
 - Receive and download files
 
   ![Sendight](./screenshots/Screenshot-6.png)
+
+
+
+> UI design inspriation from [firefox send](https://github.com/mozilla/send)
