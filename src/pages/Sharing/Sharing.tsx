@@ -1,7 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 
-import { People, Person, PortableWifiOff, WifiTethering } from '@material-ui/icons';
+import {
+  CheckCircleOutlineRounded,
+  FileCopyOutlined,
+  People,
+  Person,
+  PortableWifiOff,
+  WifiTethering,
+} from '@material-ui/icons';
 import { observer } from 'mobx-react-lite';
 import RoomService from '../../services/RoomService';
 
@@ -65,13 +72,50 @@ const Content = styled.div`
   }
 `;
 
-const Heading = styled.div`
-  margin-bottom: 16px;
+const RoomLinkContainer = styled.div`
+  margin-bottom: 12px;
 `;
+
+const RoomLinkActionContainer = styled.div`
+  display: flex;
+  align-items: center;
+  margin-top: 4px;
+`;
+
+const RoomLink = styled.input`
+  padding: 8px 12px;
+  border-radius: 8px;
+  width: 100%;
+  margin-right: 8px;
+  background: transparent;
+  color: white;
+  border: 1px solid rgba(42, 42, 46, 1);
+  font-size: 14px;
+`;
+
+const CopyLink = styled.div`
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  transition: 0.3s;
+  border-radius: 8px;
+
+  &:hover {
+    background-color: #e91e63;
+    transition: 0.3s;
+  }
+
+  &:active {
+    transform: scale(0.8);
+  }
+`;
+
+const Heading = styled.div``;
 
 const Illustration = styled.img`
   margin-top: 32px;
-  height: 250px;
+  height: 170px;
 `;
 
 const CreateNewRoomWrapper = styled.div`
@@ -85,12 +129,16 @@ const CreateNewRoomButtonWrapper = styled.div`
 `;
 
 const StatusesWrapper = styled.div`
+  margin-bottom: 12px;
+`;
+
+const StatusesActionWrapper = styled.div`
   display: flex;
   justify-content: space-between;
   padding: 8px 12px;
   border: 1px solid rgba(42, 42, 46, 1);
   border-radius: 8px;
-  margin-bottom: 8px;
+  margin-top: 4px;
 `;
 
 const WebRTCStatusWrapper = styled.div`
@@ -115,6 +163,7 @@ const Sharing = (): React.ReactElement => {
   const [isRoomJoinedOrCreated, setIsRoomJoined] = useState(false);
   const [currentLoadingState, setLoadingState] = useState('');
   const [currentErrorState, setErrorState] = useState('');
+  const [isRoomLinkCopied, setIsRoomLinkCopied] = useState(false);
 
   /**
    * Function to handle the joining of a room
@@ -195,6 +244,16 @@ const Sharing = (): React.ReactElement => {
     return <FileDropper />;
   };
 
+  const handleCopyLink = () => {
+    navigator.clipboard.writeText(window.location.href);
+
+    setIsRoomLinkCopied(true);
+
+    setTimeout(() => {
+      setIsRoomLinkCopied(false);
+    }, 3000);
+  };
+
   /**
    * This checks if user want to connect to a pre-existing sharing room
    */
@@ -207,30 +266,51 @@ const Sharing = (): React.ReactElement => {
     }
   }, []);
 
+  const IconStyles = { fontSize: '18px' };
+
   return (
     <Wrapper>
       <Container>
         <ActionAndContentWrapper>
           <ActionWrapper>{getActionWrapperContent()}</ActionWrapper>
           <Content>
+            <RoomLinkContainer>
+              <Text content="Copy and share this link with your friend" fontSize="14px" fontWeight="600" />
+              <RoomLinkActionContainer>
+                <RoomLink value={window.location.href} readOnly />
+                <CopyLink onClick={handleCopyLink}>
+                  {isRoomLinkCopied ? (
+                    <CheckCircleOutlineRounded style={IconStyles} />
+                  ) : (
+                    <FileCopyOutlined style={IconStyles} />
+                  )}
+                </CopyLink>
+              </RoomLinkActionContainer>
+            </RoomLinkContainer>
+
             <StatusesWrapper>
-              <WebRTCStatusWrapper>
-                <Text content="WebRTC Connection" fontSize="12px" fontWeight="800" />
-                {DataStore.webRTCConnectionStatus === WebRTCConnectionStatus.CONNECTED ? (
-                  <WifiTethering style={{ color: '#81c784' }} />
-                ) : (
-                  <PortableWifiOff style={{ color: '#e57373' }} />
-                )}
-              </WebRTCStatusWrapper>
-              <PeerStatusWrapper>
-                <Text content="Peer Connection" fontSize="12px" fontWeight="800" />
-                {DataStore.peerConnectionStatus ? (
-                  <People style={{ color: '#81c784' }} />
-                ) : (
-                  <Person style={{ color: '#e57373' }} />
-                )}
-              </PeerStatusWrapper>
+              <Text content="Connection Statuses" fontSize="14px" fontWeight="600" />
+
+              <StatusesActionWrapper>
+                <WebRTCStatusWrapper>
+                  <Text content="WebRTC Connection" fontSize="12px" fontWeight="800" />
+                  {DataStore.webRTCConnectionStatus === WebRTCConnectionStatus.CONNECTED ? (
+                    <WifiTethering style={{ color: '#81c784' }} />
+                  ) : (
+                    <PortableWifiOff style={{ color: '#e57373' }} />
+                  )}
+                </WebRTCStatusWrapper>
+                <PeerStatusWrapper>
+                  <Text content="Peer Connection" fontSize="12px" fontWeight="800" />
+                  {DataStore.peerConnectionStatus ? (
+                    <People style={{ color: '#81c784' }} />
+                  ) : (
+                    <Person style={{ color: '#e57373' }} />
+                  )}
+                </PeerStatusWrapper>
+              </StatusesActionWrapper>
             </StatusesWrapper>
+
             <Heading>
               <Text content="Simple P2P file sharing" fontSize="32px" fontWeight="800" />
             </Heading>
