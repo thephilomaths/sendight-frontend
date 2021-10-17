@@ -1,6 +1,6 @@
 # Sendight
 
-Sendight is a Peer-to-Peer file sharing platform built on top of webRTC.
+Sendight is a Peer-to-Peer file sharing platform built on top of webRTC. You can share files with your friend without uploading them anywhere on the server. Just share your Sendight room URL with your friend and start sharing files without the hassle of installing any app.
 
 ## How to setup sendight-frontend
 
@@ -45,7 +45,6 @@ Sendight is a Peer-to-Peer file sharing platform built on top of webRTC.
 - Styled components
 - Socket.io
 - WebRTC
-- CSS
 
 ## Contribute
 
@@ -74,6 +73,4 @@ Sendight is a Peer-to-Peer file sharing platform built on top of webRTC.
 
   ![Sendight](./screenshots/Screenshot-6.png)
 
-
-
-> UI design inspriation from [firefox send](https://github.com/mozilla/send)
+### UI design inspiration from [Firefox Send](https://github.com/mozilla/send). Firefox Send was an awesome project, sad that Mozilla stopped it :(
