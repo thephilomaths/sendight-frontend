@@ -1,46 +1,47 @@
-# Getting Started with Create React App
+# Sendight
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Sendight is a Peer-to-Peer file sharing platform built on top of webRTC.
 
-## Available Scripts
+## How to setup sendight-frontend
 
-In the project directory, you can run:
+- Clone the respository using `git clone https://github.com/thephilomaths/sendight-frontend.git`
+- Open a terminal in the project root and install all dependencies using `yarn install`
+- Serve the frontend using `yarn start`
+- Open a browser and go to `http://localhost:3000`. You can now use the app
+  
+## How to use the app
 
-### `yarn start`
+- Prerequisites:
+  - Serve the backend and frontend. The backend can be found [here](https://github.com/thephilomaths/sendight-backend)
+- Open the frontend in a browser window by going to `http://localhost:3000`
+- Click on create room
+- After creating the room, you will notice that the route in the address bar changes. The new route is the URL of the room
+- Copy the room URL and share it with anyone with whom you want to share a file with
+- The other party can join the room by using the above URL
+  - Note: Only 2 people can join the room at a time
+- After both the parties have joined the room, you should be able to see the status of webRTC and peer connections change from red to green. If this doesn't happen, some error has occured while creating the webRTC connection. Try refreshing the page and if that doesn't work, then you may be behind a symmetric NAT gateway. 
+- Now click on `Select files to send` and select any file(s) that you want to send
+- After selecting the files click `Send`
+- Now, you should be able to see the statuses of files being sent and the receiver should be able to see the file being received
+- You can cancel the sending process any time
+- After the file is sent, the receiver will see a download button alongside each file
+ 
+## Known Issues
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+- WebRTC connection failure
+- Not able to send same file multiple times
+- Slow speed while sending large files
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+## TODO
 
-### `yarn test`
+- [ ] Improve speed
+- [ ] Use a database for storing received files instead of storing in memory
+- [ ] Issue with UI on mobile devices
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+## Tech stack
 
-### `yarn build`
-
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `yarn eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
-
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
-
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
+- React.js
+- Styled components
+- Socket.io
+- WebRTC
+- CSS
